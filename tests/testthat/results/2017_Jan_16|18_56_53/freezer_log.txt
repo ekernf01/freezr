@@ -1,0 +1,8 @@
+freezr was called from ` /Users/erickernfeld/Desktop/software_projects/freezr/tests/testthat ` .
+There were 2 files to be sourced, in this order:
+functions_to_freeze.Rmd
+script_to_freeze.R
+The destination was ` /Users/erickernfeld/Desktop/software_projects/freezr/tests/testthat/results/2017_Jan_16|18_56_53 `.
+Any text sent to the console were diverted to ` /Users/erickernfeld/Desktop/software_projects/freezr/tests/testthat/results/2017_Jan_16|18_56_53/freezer_output.txt `.
+Any graphics sent to the interactive graphics window were diverted to ` /Users/erickernfeld/Desktop/software_projects/freezr/tests/testthat/results/2017_Jan_16|18_56_53/all_graphics_out.pdf `.
+If you enjoyed using freezr, please write your future self some nice notes!

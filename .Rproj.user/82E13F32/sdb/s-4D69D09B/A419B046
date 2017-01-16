@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "freeze( analyses_to_run = c( \"functions_to_freeze.Rmd\", \"script_to_freeze.R\" ),\n        destination = file.path(getwd(), \"results\") )\n\nSys.sleep(2) #time stamps have a 1-second resolution.\nfreeze( analyses_to_run = c( \"functions_to_freeze.Rmd\", \"script_to_freeze.R\" ),\n        destination = file.path(getwd(), \"results\"),\n        dependencies = \"dependency.txt\")\n",
+    "created" : 1484604709850.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "496291668",
+    "id" : "A419B046",
+    "lastKnownWriteTime" : 1484607120,
+    "last_content_update" : 1484607120217,
+    "path" : "~/Desktop/software_projects/freezr/tests/testthat/test_freezr.R",
+    "project_path" : "tests/testthat/test_freezr.R",
+    "properties" : {
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
