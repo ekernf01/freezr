@@ -1,10 +1,10 @@
-##Welcome to the cold room
+##Welcome to the cold room!
 
-If you are a data analyst in a scientific or scholarly field, then you've experienced the tension between fast-changing code and reproducibility. `freezr` helps you reproduce previous analyses or field specific questions about them. `freezr` will simultaneously:
+If you are a data analyst in a scientific or scholarly field, then you've likely experienced the tension between fast-changing code and reproducibility. `freezr` helps you keep track of previous analyses. It will simultaneously:
 
-- **running your code**,
-- **gathering the output** into a time-stamped results folder, and
-- **saving a copy of your code** along with the results.
+- **run your code**,
+- **gather the output** into a time-stamped results folder, and
+- **save a copy of your code** along with the results.
 
 -
 
