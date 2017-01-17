@@ -14,11 +14,11 @@ You can install `freezr` using Hadley Wickham's `devtools` package:
 
     devtools::install_github("ekernf01/freezr")
 	
-Then you can start freezing code immediately. The following line will run `my_functions.R` and then `my_script.R`, saving them and their resu
+Then you can start freezing code immediately. The following line will run `my_functions.R` and then `my_script.R`, saving them and their results to `~/my_project/results/<timestamp>`.
 
     library(freezr)
-    freezr::freeze(analyses_to_run = c( "my_functions.R", "my_script.R" ),
-                   destination = file.path("~", "my_project", "results") )
+    freezr::freeze( analyses_to_run = c( "my_functions.R", "my_script.R" ),
+                    destination = file.path( "~", "my_project", "results" ) )
                    
 -
 
