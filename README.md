@@ -35,7 +35,9 @@ Then you can start freezing code immediately. The following line will run `my_fu
 
 - Why not just use Git?
 
- `freezr` is meant to be more accessible to non-experts such as wet-lab biologists. Also, it allows you to view old and new material simultaneously, with no need to switch branches or go back to previous commits.
+    - `freezr` is meant to be more accessible to software non-experts, especially wet-lab biologists. 
+    - `freezr` allows you to view old and new material simultaneously, with no need to switch branches or go back to previous commits.
+    - `freezr` saves information on package versions that might be difficult to retrieve otherwise.
 
 - I'm used to manually saving a copy of my code as I work, and that way I always remember to put notes to myself about what I'm doing. Will this make me (or my students) lazy about documenting analyses?
 
@@ -43,4 +45,4 @@ Then you can start freezing code immediately. The following line will run `my_fu
 
 - You broke my R console!
 
- I'm sorry! I used `sink()` and failed to clean up after myself. Try running `freezr::sink.reset()`. 
+ I'm sorry! I must have used `sink()` and failed to clean up after myself. Try running `freezr::sink_reset()`. 
