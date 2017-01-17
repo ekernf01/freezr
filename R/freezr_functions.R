@@ -30,14 +30,14 @@
 #'        destination = file.path("~", "my_project", "results") )
 freeze = function( analyses_to_run,
                    destination,
-                   run_from_cryo_storage = F,
+                   run_from_cryo_storage = FALSE,
                    dependencies = NULL,
                    seed_to_set = NULL,
-                   timestamp_as_folder = T,
-                   force = F,
+                   timestamp_as_folder = TRUE,
+                   force = FALSE,
                    copy_deps_kb_limit = 100,
-                   purl_aggressively = T,
-                   chastise = T,
+                   purl_aggressively = TRUE,
+                   chastise = TRUE,
                    notes_file = "notes.md" ){
 
   # # Nag user about leaving themselves notes.
@@ -61,7 +61,7 @@ freeze = function( analyses_to_run,
 
   # # Prepare and announce destination
   destination = file.path( destination, format( Sys.time(), "%Y_%b_%d|%H_%M_%S") )
-  dir.create( destination, recursive = T )
+  dir.create( destination, recursive = TRUE )
   empty = ( 0 == length( list.files( destination, all.files = TRUE, include.dirs = TRUE, no.. = TRUE ) ) )
   if( file.exists( destination ) && !empty && !force ){
     warning( paste( "freezr is quitting early because that folder already has something in it.",
@@ -109,13 +109,13 @@ freeze = function( analyses_to_run,
                        saved = rep( F, length( dependencies ) ),
                        size_kb = unlist( lapply( dependencies, file.size ) ) / 1000,
                        full_path = dependencies,
-                       stringsAsFactors = F)
+                       stringsAsFactors = FALSE)
     for( ii in seq_along( deps$name ) ){
       if( deps$size_kb[[ii]] < copy_deps_kb_limit ){
-        suppressWarnings( dir.create( file.path( destination, "dependencies" ), recursive = T ) )
+        suppressWarnings( dir.create( file.path( destination, "dependencies" ), recursive = TRUE ) )
         file.copy( from = deps$full_path[[ii]],
                    to = file.path( destination, "dependencies", deps$name[[ii]] ) )
-        deps$saved[ii] = T
+        deps$saved[ii] = TRUE
       } else {
         if( missing( copy_deps_kb_limit ) ){
           warning( paste0( "By default, freeze assumes you only want to save files below",
@@ -146,7 +146,7 @@ freeze = function( analyses_to_run,
     cat( "The R version and package version info is in `", session_info, "`.\n" )
     if(!is.null(deps)){
       cat( "Dependencies were saved if below", copy_deps_kb_limit, "kb.\n" )
-      write.table( deps, row.names = F, quote = F, sep = "\t" )
+      write.table( deps, row.names = FALSE, quote = FALSE, sep = "\t" )
     }
     if(!is.null(seed_to_set)){
       cat( "The seed was set as `", seed_to_set, "`." )
@@ -166,7 +166,7 @@ freeze = function( analyses_to_run,
 #' The file gets run **from the directory it is in**, not from \code{getwd()}.
 #' @return Name of input possibly with `.Rmd` changed to `.R`.
 run_r_or_rmd = function( file_name, destination ) {
-  name_ext = strsplit( x = file_name, split = ".", fixed = T)[[1]]
+  name_ext = strsplit( x = file_name, split = ".", fixed = TRUE)[[1]]
   ext = name_ext[ length( name_ext ) ]
   name_dot_R = paste( c( name_ext[ -length( name_ext ) ], "R"), collapse = "." )
   Sys.setenv(FREEZR_DESTINATION=destination)
@@ -178,7 +178,7 @@ run_r_or_rmd = function( file_name, destination ) {
       stop( paste( "freezr will not overwrite existing `.R` versions of `.Rmd`",
                    "files since you set `purl_aggressively=FALSE`." ) )
     }
-    knitr::purl( file_name, output = name_dot_R, quiet = T )
+    knitr::purl( file_name, output = name_dot_R, quiet = TRUE )
     source( name_dot_R )
     file.remove( name_dot_R )
   } else {

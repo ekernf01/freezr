@@ -1,2 +1,0 @@
-Called from: eval(expr, envir, enclos)
-debug at /Users/erickernfeld/Desktop/software_projects/freezr/R/freezr_functions.R#183: file.remove(name_dot_R)

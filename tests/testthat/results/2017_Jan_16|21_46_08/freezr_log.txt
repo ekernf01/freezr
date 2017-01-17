@@ -1,8 +1,0 @@
-freezr was called from ` /Users/erickernfeld/Desktop/software_projects/freezr/tests/testthat ` .
-There were 1 files to be sourced, in this order:
-script_that_fails.R
-The destination was ` /Users/erickernfeld/Desktop/software_projects/freezr/tests/testthat/results/2017_Jan_16|21_46_08 `.
-Any text sent to the console was diverted to ` /Users/erickernfeld/Desktop/software_projects/freezr/tests/testthat/results/2017_Jan_16|21_46_08/your_text_output.txt `.
-Any graphics sent to the interactive graphics window were diverted to ` /Users/erickernfeld/Desktop/software_projects/freezr/tests/testthat/results/2017_Jan_16|21_46_08/your_graphics_out.pdf `.
-The R version and package version info is in ` /Users/erickernfeld/Desktop/software_projects/freezr/tests/testthat/results/2017_Jan_16|21_46_08/sessionInfo.txt `.
-If you enjoyed using freezr, please write your future self some nice notes on my behalf!
