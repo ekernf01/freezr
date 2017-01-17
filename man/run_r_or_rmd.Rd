@@ -4,7 +4,7 @@
 \alias{run_r_or_rmd}
 \title{\code{source} code from an R or Rmarkdown file.}
 \usage{
-run_r_or_rmd(file_name)
+run_r_or_rmd(file_name, destination)
 }
 \arguments{
 \item{file_name}{An RMarkdown file or an R file to be (\code{purl}ed and) run.

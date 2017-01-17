@@ -64,7 +64,6 @@ freeze = function( analyses_to_run,
   dir.create( destination, recursive = T )
   empty = ( 0 == length( list.files( destination, all.files = TRUE, include.dirs = TRUE, no.. = TRUE ) ) )
   if( file.exists( destination ) && !empty && !force ){
-    browser()
     warning( paste( "freezr is quitting early because that folder already has something in it.",
                     "Try setting `force=TRUE` or `timestamp_as_folder=TRUE`. ") )
     return()
@@ -74,15 +73,16 @@ freeze = function( analyses_to_run,
                     "If that makes you nervous, try setting `timestamp_as_folder=TRUE`. ") )
     return()
   }
-  graphics_out = file.path( destination, "all_graphics_out.pdf" )
+  graphics_out = file.path( destination, "your_graphics_out.pdf" )
   cat( paste0( "Saving analysis tools to `", destination, "`\n with plots in `", graphics_out, "`.\n" ) )
 
   # # run analyses and freeze them, capturing graphics and text.
   if( !is.null( seed_to_set ) ) { set.seed( seed_to_set ) }
   pdf( graphics_out )
   {
-    outfile = file.path( destination, "freezer_output.txt" )
+    outfile = file.path( destination, "your_text_output.txt" )
     file.create( outfile )
+    # # tryCatch statements should undo the sink call in case the user's script fails.
     sink( file = outfile )
     {
       for( analysis_i in analyses_to_run ){
@@ -91,10 +91,10 @@ freeze = function( analyses_to_run,
         if( run_from_cryo_storage ){
           old_wd = getwd()
           setwd( destination )
-          run_r_or_rmd( frozen_analysis_i )
+           try( expr = { run_r_or_rmd( frozen_analysis_i, destination ) } )
           setwd( old_wd )
         } else {
-          run_r_or_rmd( frozen_analysis_i )
+          try( expr = { run_r_or_rmd( frozen_analysis_i, destination ) } )
         }
       }
     }
@@ -114,8 +114,7 @@ freeze = function( analyses_to_run,
       if( deps$size_kb[[ii]] < copy_deps_kb_limit ){
         suppressWarnings( dir.create( file.path( destination, "dependencies" ), recursive = T ) )
         file.copy( from = deps$full_path[[ii]],
-                   to = file.path( destination, "dependencies", deps$name[[ii]] ),
-                   )
+                   to = file.path( destination, "dependencies", deps$name[[ii]] ) )
         deps$saved[ii] = T
       } else {
         if( missing( copy_deps_kb_limit ) ){
@@ -129,8 +128,12 @@ freeze = function( analyses_to_run,
     deps = NULL
   }
 
+  # # Save info on e.g. package versions.
+  session_info = file.path( destination, "sessionInfo.txt" )
+  write( capture_output( print( sessionInfo() ) ), session_info)
+
   # # Make a nice happy log file
-  logfile = file.path( destination, "freezer_log.txt" )
+  logfile = file.path( destination, "freezr_log.txt" )
   file.create( logfile )
   sink( file = logfile )
   {
@@ -138,8 +141,9 @@ freeze = function( analyses_to_run,
     cat(paste("There were", length(analyses_to_run), "files to be sourced, in this order:\n"))
     cat( paste( analyses_to_run, collapse = "\n" ))
     cat( "\nThe destination was `", destination, "`.\n" )
-    cat( "Any text sent to the console were diverted to `", outfile, "`.\n" )
+    cat( "Any text sent to the console was diverted to `", outfile, "`.\n" )
     cat( "Any graphics sent to the interactive graphics window were diverted to `", graphics_out, "`.\n" )
+    cat( "The R version and package version info is in `", session_info, "`.\n" )
     if(!is.null(deps)){
       cat( "Dependencies were saved if below", copy_deps_kb_limit, "kb.\n" )
       write.table( deps, row.names = F, quote = F, sep = "\t" )
@@ -147,9 +151,11 @@ freeze = function( analyses_to_run,
     if(!is.null(seed_to_set)){
       cat( "The seed was set as `", seed_to_set, "`." )
     }
-    cat( "If you enjoyed using freezr, please write your future self some nice notes!\n" )
+    cat( "If you enjoyed using freezr, please write your future self some nice notes on my behalf!\n" )
   }
   sink()
+
+
   return()
 }
 
@@ -159,10 +165,11 @@ freeze = function( analyses_to_run,
 #' @param file_name An RMarkdown file or an R file to be (\code{purl}ed and) run.
 #' The file gets run **from the directory it is in**, not from \code{getwd()}.
 #' @return Name of input possibly with `.Rmd` changed to `.R`.
-run_r_or_rmd = function( file_name ) {
+run_r_or_rmd = function( file_name, destination ) {
   name_ext = strsplit( x = file_name, split = ".", fixed = T)[[1]]
   ext = name_ext[ length( name_ext ) ]
   name_dot_R = paste( c( name_ext[ -length( name_ext ) ], "R"), collapse = "." )
+  Sys.setenv(FREEZR_DESTINATION=destination)
   if( tolower( ext ) == "r" ) {
     source( file_name )
   } else if( tolower( ext ) == "rmd" ){
@@ -178,4 +185,13 @@ run_r_or_rmd = function( file_name ) {
     stop("Can only handle `.R` and `.Rmd` files.")
   }
   return( name_dot_R )
+}
+
+#' Fix a problem where nothing prints to the console.
+#' @seealso Many thanks to this thread:
+#' \url{http://stackoverflow.com/questions/18730491/sink-does-not-release-file}
+sink_reset <- function(){
+  for(i in seq_len(sink.number())){
+    sink(NULL)
+  }
 }

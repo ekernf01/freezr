@@ -1,0 +1,17 @@
+---
+title: "Demo Rmd file"
+author: "Eric Kernfeld"
+date: "January 16, 2017"
+output: html_document
+---
+
+This is a file with a function in it. The function's output depends on `dependency.txt` and the function gets used in `script_to_freeze.R`.
+
+```{r}
+print_dependency_contents = function( ){
+  print( FREEZR_DESTINATION )
+  print( readLines( "dependency.txt" ))
+  write.table(rnorm(5), file.path( FREEZR_DESTINATION, "demo_output.txt" ) )
+  hist( rnorm(50), main = "I'm a histogram!" )
+}
+```

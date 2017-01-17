@@ -1,7 +1,0 @@
-[1] "This is a super-critical thing without which my analysis is utterly irreproducible."
-I noticed there was no file called notes.txt in your destination folder.
- I'll make one so you can leave your future self some notes.
- If you want me to shut up about this, put `chastise=F`.
-Saving analysis tools to `/Users/erickernfeld/Desktop/software_projects/freezr/tests/testthat/results/2017_Jan_16|18_39_49`
- with plots in `/Users/erickernfeld/Desktop/software_projects/freezr/tests/testthat/results/2017_Jan_16|18_39_49/all_graphics_out.pdf`.
-[1] "blah"
