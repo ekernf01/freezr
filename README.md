@@ -1,6 +1,6 @@
 ##Welcome to the cold room!
 
-If you are a data analyst in a scientific or scholarly field, then you've likely experienced the tension between fast-changing code and reproducibility. `freezr` helps you keep track of previous analyses. It will simultaneously:
+If you are a data analyst in a scientific or scholarly field, then you've likely experienced the tension between fast-changing code and reproducibility. `freezr` is an R package that helps you keep track of previous analyses. It will simultaneously:
 
 - **run your code**,
 - **gather the output** into a time-stamped results folder, and
