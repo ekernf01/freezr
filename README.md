@@ -33,6 +33,10 @@ Then you can start freezing code immediately. The following line will run `my_fu
 
 ####FAQ
 
+- I'm new to R. How do I access the help/manual page for your package? 
+
+ Type `?freezr::freeze`.
+
 - Why not just use Git?
 
     - `freezr` is meant to be more accessible to software non-experts, especially wet-lab biologists. 
