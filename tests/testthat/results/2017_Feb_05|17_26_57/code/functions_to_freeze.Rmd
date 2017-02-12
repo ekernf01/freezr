@@ -11,7 +11,7 @@ This is a file with a function in it. The function's output depends on `dependen
 print_dependency_contents = function( ){
  
   print( readLines( "dependency.txt" ))
-  write.table(rnorm(5), file.path( Sys.getenv()[["FREEZR_DESTINATION"]], "demo_output.txt" ) )
+  write.table(rnorm(5), file.path( Sys.getenv()[["FREEZR_DESTINATION"]], "custom_user_output.txt" ) )
   hist( rnorm(50), main = "I'm a histogram!" )
 }
 ```

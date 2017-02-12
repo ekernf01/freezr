@@ -6,8 +6,9 @@
 #' @param destination Where to save the code (and log, and maybe dependencies)
 #' @param run_from_cryo_storage If \code{FALSE} (default), runs the code from the current working directory.
 #' If \code{TRUE}, runs from \code{destination} (or a folder within it -- see param \code{timestamp_as_folder}).
-#' The default option makes it easy to find files your code depends on, but hard to put your own
-#' output files in \code{destination}. The non-default option has the opposite properties and tends to
+#' The default option, \code{FALSE}, makes it easier to write your code because you know where it'll be run from.
+#' You can access \code{Sys.getenv()[["FREEZR_DESTINATION"]]} within your scripts to produce custom output.
+#' The non-default option makes it easier to
 #' break code unless it uses absolute paths throughout.
 #' @param dependencies A list of file paths to extra files your analysis uses.
 #' They will get saved to destination if they are smaller than \code{copy_deps_kb_limit.}
@@ -20,9 +21,9 @@
 #' smaller than \code{copy_deps_kb_limit}.
 #' @param purl_aggressively If \code{TRUE} (default), then when purling Rmd files, the
 #' corresponding R files may be overwritten.
-#' @param chastize If \code{TRUE} (default), creates a \code{notes.txt} file for you and nags
+#' @param chastise If \code{TRUE} (default), creates a \code{notes.txt} file for you and nags
 #' you about filling it.
-#' @param notes_file Name of file to be created while \code{chastize}ing.
+#' @param notes_file Name of file to be created while \code{chastise}ing.
 #' @return \code{NULL} return value.
 #' @examples
 #' setwd( file.path( "~", "my_project" ) )
@@ -65,7 +66,7 @@ freeze = function( analyses_to_run,
   empty = ( 0 == length( list.files( destination, all.files = TRUE, include.dirs = TRUE, no.. = TRUE ) ) )
   if( file.exists( destination ) && !empty && !force ){
     warning( paste( "freezr is quitting early because that folder already has something in it.",
-                    "Try setting `force=TRUE` or `timestamp_as_folder=TRUE`. ") )
+                    "Try setting `timestamp_as_folder=TRUE` or (if absolutely necessary) `force=TRUE`. ") )
     return()
   }
   if( file.exists( destination ) && !empty && force ){
@@ -73,25 +74,28 @@ freeze = function( analyses_to_run,
                     "If that makes you nervous, try setting `timestamp_as_folder=TRUE`. ") )
     return()
   }
-  graphics_out = file.path( destination, "your_graphics_out.pdf" )
-  cat( paste0( "Saving analysis tools to `", destination, "`\n with plots in `", graphics_out, "`.\n" ) )
+  cat( paste0( "Saving analysis tools to `", destination, "`.\n" ) )
 
   # # run analyses and freeze them, capturing graphics and text.
-  if( !is.null( seed_to_set ) ) { set.seed( seed_to_set ) }
+  dir.create( file.path( destination, "output" ) )
+  dir.create( file.path( destination, "code" ) )
+  dir.create( file.path( destination, "logs" ) )
+  graphics_out = file.path( destination, "output", "graphics.pdf" )
   pdf( graphics_out )
   {
-    outfile = file.path( destination, "your_text_output.txt" )
+    outfile = file.path( destination, "output", "text.txt" )
     file.create( outfile )
-    # # tryCatch statements should undo the sink call in case the user's script fails.
     sink( file = outfile )
     {
+      if( !is.null( seed_to_set ) ) { set.seed( seed_to_set ) }
       for( analysis_i in analyses_to_run ){
-        frozen_analysis_i = file.path( destination, analysis_i )
+        frozen_analysis_i = file.path( destination, "code", analysis_i )
+        if( !dir.exists( dirname( frozen_analysis_i ) ) ){ dir.create( dirname( frozen_analysis_i ) )}
         file.copy( from = analysis_i, to = frozen_analysis_i )
         if( run_from_cryo_storage ){
           old_wd = getwd()
           setwd( destination )
-           try( expr = { run_r_or_rmd( frozen_analysis_i, destination ) } )
+          try( expr = { run_r_or_rmd( frozen_analysis_i, destination ) } )
           setwd( old_wd )
         } else {
           try( expr = { run_r_or_rmd( frozen_analysis_i, destination ) } )
@@ -129,34 +133,29 @@ freeze = function( analyses_to_run,
   }
 
   # # Save info on e.g. package versions.
-  session_info = file.path( destination, "sessionInfo.txt" )
+  session_info = file.path( destination, "logs", "sessionInfo.txt" )
   write( capture_output( print( sessionInfo() ) ), session_info)
 
-  # # Make a nice happy log file
-  logfile = file.path( destination, "freezr_log.txt" )
-  file.create( logfile )
-  sink( file = logfile )
-  {
-    cat(paste("freezr was called from `", getwd(),  "` .\n"))
-    cat(paste("There were", length(analyses_to_run), "files to be sourced, in this order:\n"))
-    cat( paste( analyses_to_run, collapse = "\n" ))
-    cat( "\nThe destination was `", destination, "`.\n" )
-    cat( "Any text sent to the console was diverted to `", outfile, "`.\n" )
-    cat( "Any graphics sent to the interactive graphics window were diverted to `", graphics_out, "`.\n" )
-    cat( "The R version and package version info is in `", session_info, "`.\n" )
-    if(!is.null(deps)){
-      cat( "Dependencies were saved if below", copy_deps_kb_limit, "kb.\n" )
-      write.table( deps, row.names = FALSE, quote = FALSE, sep = "\t" )
-    }
-    if(!is.null(seed_to_set)){
-      cat( "The seed was set as `", seed_to_set, "`." )
-    }
-    cat( "If you enjoyed using freezr, please write your future self some nice notes on my behalf!\n" )
-  }
-  sink()
-
-
-  return()
+  # # Make log files, both human and machine readable
+  freeze_call = list( analyses_to_run = analyses_to_run,
+                      destination = destination,
+                      run_from_cryo_storage = run_from_cryo_storage,
+                      dependencies = dependencies,
+                      seed_to_set = seed_to_set,
+                      timestamp_as_folder = timestamp_as_folder,
+                      force = force,
+                      copy_deps_kb_limit = copy_deps_kb_limit,
+                      purl_aggressively = purl_aggressively,
+                      chastise = chastise,
+                      notes_file = notes_file )
+  logfile = file.path( destination, "logs", "freeze_call.txt" )
+  saveRDS( freeze_call, file.path( destination, "logs", "freeze_call_RDS.data" ) )
+  write.table( getwd(), file.path( destination, "logs", "freeze_call_wd.txt" ),
+               quotes = FALSE, row.names = FALSE, col.names = FALSE )
+  write.table( x = t( as.data.frame( pad_list( freeze_call ) ) ),
+               file = logfile,
+               quote = FALSE, col.names = FALSE, sep = "\t" )
+  return( invisible( destination ) )
 }
 
 
@@ -169,16 +168,18 @@ run_r_or_rmd = function( file_name, destination ) {
   name_ext = strsplit( x = file_name, split = ".", fixed = TRUE)[[1]]
   ext = name_ext[ length( name_ext ) ]
   name_dot_R = paste( c( name_ext[ -length( name_ext ) ], "R"), collapse = "." )
-  Sys.setenv(FREEZR_DESTINATION=destination)
+  Sys.setenv(FREEZR_DESTINATION=file.path( destination, "user" ) )
+  suppressWarnings( dir.create( file.path( destination, "user" ) ) )
   if( tolower( ext ) == "r" ) {
     source( file_name )
   } else if( tolower( ext ) == "rmd" ){
     # Purl, source, and clean up
     if( file.exists( name_dot_R ) && !purl_aggressively ){
-      stop( paste( "freezr will not overwrite existing `.R` versions of `.Rmd`",
+      warning( paste( "freezr is using existing `.R` versions of `.Rmd`",
                    "files since you set `purl_aggressively=FALSE`." ) )
+    } else {
+      knitr::purl( file_name, output = name_dot_R, quiet = TRUE )
     }
-    knitr::purl( file_name, output = name_dot_R, quiet = TRUE )
     source( name_dot_R )
     file.remove( name_dot_R )
   } else {
@@ -187,11 +188,20 @@ run_r_or_rmd = function( file_name, destination ) {
   return( name_dot_R )
 }
 
-#' Fix a problem where nothing prints to the console.
+#' Turn a ragged list of atomic vectors to a rectangle by adding filler.
+pad_list = function( x, filler = "" ){
+  n = max(sapply(x, length))
+  pad_vec = function( v ){ c( v, rep( filler, n - length( v ) ) )}
+  x = setNames( lapply( x, pad_vec ), names( x ) )
+  return( x )
+}
+
+#' Fix a problem where nothing prints to the console after an unknown number of \code{sink()} calls.
 #' @seealso Many thanks to this thread:
 #' \url{http://stackoverflow.com/questions/18730491/sink-does-not-release-file}
 sink_reset <- function(){
-  for(i in seq_len(sink.number())){
-    sink(NULL)
+  for( i in seq_len( sink.number( ) ) ){
+    sink( NULL )
   }
 }
+
