@@ -4,7 +4,7 @@ author: "Eric Kernfeld"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{freezr tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -31,7 +31,6 @@ Fortunately, much of this extra work can be automated. Keep reading!
 First, some preliminaries: to install and load, run this.
 
 ```{r}
-install.packages("devtools") # installs devtools
 devtools::install_github("ekernf01/freezr") # installs freezr
 library(freezr)
 ```
@@ -40,8 +39,8 @@ This will create some fake code that you can pretend you've written.
 
 ```{r}
 fake_proj = file.path( getwd(), "fake_project" )
-dir.create(fake_proj)
-cat("my_fun = function(x) plot(x)", file = file.path( fake_proj, "my_script.R" ) )
+dir.create(fake_proj); setwd(fake_proj)
+cat("my_fun = function(x) plot(x)", file = file.path( fake_proj, "my_functions.R" ) )
 cat("my_fun(1:5);print('blah')", file = file.path( fake_proj, "my_script.R" ) )
 dir.create(file.path( fake_proj, "results" ))
 ```
@@ -49,8 +48,8 @@ dir.create(file.path( fake_proj, "results" ))
 Now let's freeze it.
 
 ```{r}
-freezr::freeze( analyses_to_run = c( "my_functions.R", "my_script.R" ),
-                destination = file.path( fake_proj, "results" ) )
+freeze( analyses_to_run = c( "my_functions.R", "my_script.R" ),
+        destination = file.path( fake_proj, "results" ) )
 ```
    
 In this line of code, `freeze` will:

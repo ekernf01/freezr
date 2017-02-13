@@ -95,10 +95,10 @@ freeze = function( analyses_to_run,
         if( run_from_cryo_storage ){
           old_wd = getwd()
           setwd( destination )
-          try( expr = { run_r_or_rmd( frozen_analysis_i, destination ) } )
+          try( expr = { freezr:::run_r_or_rmd( frozen_analysis_i, destination ) } )
           setwd( old_wd )
         } else {
-          try( expr = { run_r_or_rmd( frozen_analysis_i, destination ) } )
+          try( expr = { freezr:::run_r_or_rmd( frozen_analysis_i, destination ) } )
         }
       }
     }
@@ -134,7 +134,7 @@ freeze = function( analyses_to_run,
 
   # # Save info on e.g. package versions.
   session_info = file.path( destination, "logs", "sessionInfo.txt" )
-  write( capture_output( print( sessionInfo() ) ), session_info)
+  write( testthat::capture_output( print( sessionInfo() ) ), session_info)
 
   # # Make log files, both human and machine readable
   freeze_call = list( analyses_to_run = analyses_to_run,
@@ -152,7 +152,7 @@ freeze = function( analyses_to_run,
   saveRDS( freeze_call, file.path( destination, "logs", "freeze_call_RDS.data" ) )
   write.table( getwd(), file.path( destination, "logs", "freeze_call_wd.txt" ),
                quote = FALSE, row.names = FALSE, col.names = FALSE )
-  write.table( x = t( as.data.frame( pad_list( freeze_call ) ) ),
+  write.table( x = t( as.data.frame( freezr:::pad_list( freeze_call ) ) ),
                file = logfile,
                quote = FALSE, col.names = FALSE, sep = "\t" )
   return( invisible( destination ) )

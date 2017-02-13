@@ -1,0 +1,1 @@
+my_fun = function(x) plot(x)
