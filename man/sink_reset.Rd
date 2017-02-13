@@ -2,12 +2,12 @@
 % Please edit documentation in R/freezr_functions.R
 \name{sink_reset}
 \alias{sink_reset}
-\title{Fix a problem where nothing prints to the console.}
+\title{Fix a problem where nothing prints to the console after an unknown number of \code{sink()} calls.}
 \usage{
 sink_reset()
 }
 \description{
-Fix a problem where nothing prints to the console.
+Fix a problem where nothing prints to the console after an unknown number of \code{sink()} calls.
 }
 \seealso{
 Many thanks to this thread:

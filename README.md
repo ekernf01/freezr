@@ -1,4 +1,4 @@
-##A simple reproducibility tool
+##A simple, transparent reproducibility tool
 
 If you are a data analyst in a scientific or scholarly field, then you've likely experienced the tension between fast-changing code and reproducibility. `freezr` is an `R` package meant to alleviate this tension. It helps you archive your current analysis more easily so you can move on to the next question or approach. In a single line of code, it will helpfully:
 
@@ -11,9 +11,10 @@ If you are a data analyst in a scientific or scholarly field, then you've likely
 
 ####Getting started
 
-You can install `freezr` using the `devtools` package:
+You can install `freezr` using the [`devtools`](https://www.rstudio.com/products/rpackages/devtools/) package:
 
-    devtools::install_github("ekernf01/freezr")
+    install.packages("devtools") # installs devtools
+    devtools::install_github("ekernf01/freezr") # installs freezr
 	
 Then you can start freezing code immediately. The following line will run `my_functions.R` and then `my_script.R`, saving them and their results to `~/my_project/results/<timestamp>`.
 
@@ -25,10 +26,14 @@ Then you can start freezing code immediately. The following line will run `my_fu
 
 ####Features
 
-- **easy customization**: if you want to further format the results, your scripts can access the destination via `Sys.getenv()[["FREEZR_DESTINATION"]]`.
-- **dependency tracking:** `freezr` is not limited to saving code. You can also save tables or other files that your analysis depends on. 
-- **R markdown:** `freezr` can `purl` an R Markdown file and run the resulting R code. (It cannot `knit` yet, but that may change in future versions.)
-- **Graphical and plain-text console output:** `freezr` redirects these to files for you to peruse later.
+- This package has other functions:
+	- `inventory` helps follow data from one analysis to the next. Use it to **retrieve files without hard-coding a bunch of paths** into your scripts. See `?freezr::inventory`.
+	- `thaw` is not ready yet but will re-run a frozen analysis.
+- The `freeze` function offers:
+	- **easy customization**: if you want to further format the results, your scripts can access the destination via `Sys.getenv()[["FREEZR_DESTINATION"]]`.
+	- **dependency tracking:** `freezr` is not limited to saving code. You can also save tables or other files that your analysis depends on. 
+	- **R markdown:** `freezr` can `purl` an R Markdown file and run the resulting R code. (It cannot `knit` yet, but that may change in future versions.)
+	- **Graphical and plain-text console output:** `freezr` redirects these to files for you to peruse later.
 
 -
 

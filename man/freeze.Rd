@@ -4,10 +4,10 @@
 \alias{freeze}
 \title{Run an analysis while freezing a copy of the code (and perhaps dependencies) for later perusal.}
 \usage{
-freeze(analyses_to_run, destination, run_from_cryo_storage = F,
-  dependencies = NULL, seed_to_set = NULL, timestamp_as_folder = T,
-  force = F, copy_deps_kb_limit = 100, purl_aggressively = T,
-  chastise = T, notes_file = "notes.md")
+freeze(analyses_to_run, destination, run_from_cryo_storage = FALSE,
+  dependencies = NULL, seed_to_set = NULL, timestamp_as_folder = TRUE,
+  force = FALSE, copy_deps_kb_limit = 100, purl_aggressively = TRUE,
+  chastise = TRUE, notes_file = "notes.md")
 }
 \arguments{
 \item{analyses_to_run}{R or R markdown files to be run and frozen.}
@@ -16,8 +16,9 @@ freeze(analyses_to_run, destination, run_from_cryo_storage = F,
 
 \item{run_from_cryo_storage}{If \code{FALSE} (default), runs the code from the current working directory.
 If \code{TRUE}, runs from \code{destination} (or a folder within it -- see param \code{timestamp_as_folder}).
-The default option makes it easy to find files your code depends on, but hard to put your own
-output files in \code{destination}. The non-default option has the opposite properties and tends to
+The default option, \code{FALSE}, makes it easier to write your code because you know where it'll be run from.
+You can access \code{Sys.getenv()[["FREEZR_DESTINATION"]]} within your scripts to produce custom output.
+The non-default option makes it easier to
 break code unless it uses absolute paths throughout.}
 
 \item{dependencies}{A list of file paths to extra files your analysis uses.
@@ -37,13 +38,13 @@ smaller than \code{copy_deps_kb_limit}.}
 \item{purl_aggressively}{If \code{TRUE} (default), then when purling Rmd files, the
 corresponding R files may be overwritten.}
 
-\item{notes_file}{Name of file to be created while \code{chastize}ing.}
-
-\item{chastize}{If \code{TRUE} (default), creates a \code{notes.txt} file for you and nags
+\item{chastise}{If \code{TRUE} (default), creates a \code{notes.txt} file for you and nags
 you about filling it.}
+
+\item{notes_file}{Name of file to be created while \code{chastise}ing.}
 }
 \value{
-\code{NULL} return value.
+returns \code{destination} arg.
 }
 \description{
 Run an analysis while freezing a copy of the code (and perhaps dependencies) for later perusal.
