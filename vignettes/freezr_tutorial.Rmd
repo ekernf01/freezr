@@ -16,28 +16,21 @@ Data analysis projects require moderately complex organization
 (
 [example 1](https://www.maxmasnick.com/analysis-org/), 
 [example 2](https://r-dir.com/blog/2013/11/folder-structure-for-data-analysis.html), 
-[example 3](https://medium.com/human-in-a-machine-world/folder-structure-for-data-analysis-62a84949a6ce#.tj5h1u2wp))
-), which can be especially daunting for newcomers.
+[example 3](https://medium.com/human-in-a-machine-world/folder-structure-for-data-analysis-62a84949a6ce#.tj5h1u2wp)
+), which can be daunting, especially for newcomers to the field.
 To make a project reproducible, the data analyst incurs even more overhead. Every time 
 a result merits recording, their future self (or a colleague taking over) will need 
 more than just the current graphical or text output. They'll need, at a minimum, working code and 
 notes about the analysis. Better still would be to save package versions and other 
-input or dependencies. 
+inputs or dependencies. 
 
-Fortunately, much of this extra work can be automated. Keep reading!
+Fortunately, much of this extra work can be automated. 
 
 ###`freeze` helps record analyses for later
  
-First, some preliminaries: to install and load, run this.
+First, some preliminaries: this will create some fake code that you can pretend you've written.
 
-```{r}
-devtools::install_github("ekernf01/freezr") # installs freezr
-library(freezr)
-```
- 
-This will create some fake code that you can pretend you've written.
-
-```{r}
+```{r, warning=F}
 fake_proj = file.path( getwd(), "fake_project" )
 dir.create(fake_proj); setwd(fake_proj)
 cat("my_fun = function(x) plot(x)", file = file.path( fake_proj, "my_functions.R" ) )
@@ -47,31 +40,32 @@ dir.create(file.path( fake_proj, "results" ))
 
 Now let's freeze it.
 
-```{r}
+```{r, warning=F}
+library(freezr)
 freeze( analyses_to_run = c( "my_functions.R", "my_script.R" ),
         destination = file.path( fake_proj, "results" ) )
 ```
    
-In this line of code, `freeze` will:
+In this line of code, `freeze` has:
 
 - **run your scripts**,
-- **gather the output** into a time-stamped results folder,
+- **gathered the output** into a time-stamped results folder,
 - **save a copy of your code** along with the results, and
-- **nag you to write down some notes** about what you did.
+- **nagged you to write down some notes** about what you did.
 
-
+Now you can go add notes to the file it created, and then you're free to keep iterating on your analysis.
 
 ###Inventory
 
 Let's move into another demo folder.
 
-```{r}
+```{r, warning=F}
 dir.create(path = "inventory_demo")
 setwd("inventory_demo")
 ```
 
 Imagine you have a bunch of crap built up, including the alphabet.
-```{r}
+```{r, warning=F}
 ugly_folders = paste0( "long_ugly_results_folder_2017JAN11", 1:2)
 lapply( ugly_folders, dir.create )
 write.table(letters, file.path(ugly_folders[1], "alphabet.txt"))
