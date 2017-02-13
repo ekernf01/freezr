@@ -1,0 +1,130 @@
+---
+title: "Using `freezr` for tracking data analyses"
+author: "Eric Kernfeld"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+###What problem does `freezr` solve?
+
+Data analysis projects require moderately complex organization 
+(
+[example 1](https://www.maxmasnick.com/analysis-org/), 
+[example 2](https://r-dir.com/blog/2013/11/folder-structure-for-data-analysis.html), 
+[example 3](https://medium.com/human-in-a-machine-world/folder-structure-for-data-analysis-62a84949a6ce#.tj5h1u2wp))
+), which can be especially daunting for newcomers.
+To make a project reproducible, the data analyst incurs even more overhead. Every time 
+a result merits recording, their future self (or a colleague taking over) will need 
+more than just the current graphical or text output. They'll need, at a minimum, working code and 
+notes about the analysis. Better still would be to save package versions and other 
+input or dependencies. 
+
+Fortunately, much of this extra work can be automated. Keep reading!
+
+###`freeze` helps record analyses for later
+ 
+First, some preliminaries: to install and load, run this.
+
+```{r}
+install.packages("devtools") # installs devtools
+devtools::install_github("ekernf01/freezr") # installs freezr
+library(freezr)
+```
+ 
+This will create some fake code that you can pretend you've written.
+
+```{r}
+fake_proj = file.path( getwd(), "fake_project" )
+dir.create(fake_proj)
+cat("my_fun = function(x) plot(x)", file = file.path( fake_proj, "my_script.R" ) )
+cat("my_fun(1:5);print('blah')", file = file.path( fake_proj, "my_script.R" ) )
+dir.create(file.path( fake_proj, "results" ))
+```
+
+Now let's freeze it.
+
+```{r}
+freezr::freeze( analyses_to_run = c( "my_functions.R", "my_script.R" ),
+                destination = file.path( fake_proj, "results" ) )
+```
+   
+In this line of code, `freeze` will:
+
+- **run your scripts**,
+- **gather the output** into a time-stamped results folder,
+- **save a copy of your code** along with the results, and
+- **nag you to write down some notes** about what you did.
+
+
+
+###Inventory
+
+Let's move into another demo folder.
+
+```{r}
+dir.create(path = "inventory_demo")
+setwd("inventory_demo")
+```
+
+Imagine you have a bunch of crap built up, including the alphabet.
+```{r}
+ugly_folders = paste0( "long_ugly_results_folder_2017JAN11", 1:2)
+lapply( ugly_folders, dir.create )
+write.table(letters, file.path(ugly_folders[1], "alphabet.txt"))
+```
+
+You're about to add Spanish characters, and you wanted to easily retrieve the alphabet.
+So you put it in the inventory with an easy-to-remember tag and some notes to yourself.
+```{r}
+inventory( inv_location = getwd(),
+           tag = "abc",
+           filename = file.path(ugly_folders[1], "alphabet.txt"),
+           extra = "Honestly this is just the alphabet.")
+inventory( inv_location = getwd() )
+```
+
+Then you fetch it from the inventory and save a new version somewhere else.
+```{r}
+old_alpha_file = inventory( inv_location = getwd(),
+                            tag = "abc")
+old_alpha = read.table(old_alpha_file, stringsAsFactors = F)[[1]]
+write.table(sort(c(old_alpha, "rr", "ch", "ll", "ñ")), file.path(ugly_folders[2], "alphabet.txt"))
+```
+
+You can add a new record with language awareness and delete the old one:
+```{r}
+inventory( inv_location = getwd(),
+           tag = "abc_eng",
+           filename = file.path(ugly_folders[1], "alphabet.txt"),
+           extra = "This is the English alphabet.")
+inventory( inv_location = getwd(),
+           tag = "abc",
+           delete = T )
+inventory( inv_location = getwd() )
+```
+
+Finally, you add a record for the Spanish alphabet.
+Using a `parent_tag`, you can include the fact that
+the construction of the Spanish alphabet version
+depended on the English alphabet version.
+
+```{r}
+inventory( inv_location = getwd(),
+           tag = "abc_esp",
+           parent_tag = "abc_eng",
+           filename = file.path(ugly_folders[2], "alphabet.txt"),
+           extra = "This is the Spanish alphabet.")
+inventory( inv_location = getwd() )
+```
+
+Move back out of the demo folder to finish up.
+
+```{r}
+setwd(dirname(getwd()))
+```
+

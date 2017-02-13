@@ -2,6 +2,7 @@
 
 #' Run an analysis while freezing a copy of the code (and perhaps dependencies) for later perusal.
 #'
+#' @export
 #' @param analyses_to_run R or R markdown files to be run and frozen.
 #' @param destination Where to save the code (and log, and maybe dependencies)
 #' @param run_from_cryo_storage If \code{FALSE} (default), runs the code from the current working directory.
@@ -196,6 +197,8 @@ pad_list = function( x, filler = "" ){
 }
 
 #' Fix a problem where nothing prints to the console after an unknown number of \code{sink()} calls.
+#'
+#' @export
 #' @seealso Many thanks to this thread:
 #' \url{http://stackoverflow.com/questions/18730491/sink-does-not-release-file}
 sink_reset <- function(){
@@ -207,6 +210,7 @@ sink_reset <- function(){
 
 #' Run an analysis previously frozen by \code{freezr::freeze}. NOT GUARANTEED TO WORK but it does its best.
 #'
+#' @export
 #' @param freeze_path A directory created by \code{freezr::freeze} containing these subfolders:
 #' - logs
 #' - code
@@ -249,6 +253,7 @@ thaw = function( freeze_path, alter_dependencies = F ){
 
 #' Keep track of important items from previous analyses.
 #'
+#' @export
 #' @param inv_location Path to the inventory you want to create, access, or modify. If possible, this arg
 #'  defaults to the last inv_location given to `freeze`, i.e. \code{Sys.getenv()[["FREEZR_DESTINATION"]]}.
 #' @param tag identifier for an inventory record that you want to add, access, or modify.
@@ -279,17 +284,6 @@ thaw = function( freeze_path, alter_dependencies = F ){
 #'  and a new record will be created.}
 #' }
 #'
-#' @example
-#'
-#' # Move into a demo folder to work
-#' dir.create("inventory_demo"); setwd()
-#' # Imagine you have
-#' ugly_folders = paste0( "long_ugly_results_folder_2017JAN11", 1:4)
-#' dir.create(ugly_folder)
-#' write.table(letters, file.path(ugly_folder))
-#' inventory()
-#' # Move back out of demo folder
-#' setwd(dirname(getwd()))
 inventory = function( inv_location = NULL, tag = NULL, filename = NULL,
                       extra = character(0), parent_tag = "",
                       delete = FALSE, return_all = FALSE ){
