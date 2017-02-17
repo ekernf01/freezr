@@ -23,4 +23,3 @@ It cleans up after itself, though, moving the newer dependencies back once it ha
 \description{
 Run an analysis previously frozen by \code{freezr::freeze}. NOT GUARANTEED TO WORK but it does its best.
 }
-

@@ -54,4 +54,3 @@ setwd( file.path( "~", "my_project" ) )
 freeze(analyses_to_run = c( "my_functions.Rmd", "my_script.R" ),
        destination = file.path("~", "my_project", "results") )
 }
-

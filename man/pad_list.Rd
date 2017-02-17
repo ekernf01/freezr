@@ -9,4 +9,3 @@ pad_list(x, filler = "")
 \description{
 Turn a ragged list of atomic vectors to a rectangle by adding filler.
 }
-

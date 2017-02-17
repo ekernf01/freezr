@@ -255,7 +255,7 @@ thaw = function( freeze_path, alter_dependencies = F ){
 #'
 #' @export
 #' @param inv_location Path to the inventory you want to create, access, or modify. If possible, this arg
-#'  defaults to the last inv_location given to `freeze`, i.e. \code{Sys.getenv()[["FREEZR_DESTINATION"]]}.
+#'  defaults to the parent of the last destination given to `freeze`.
 #' @param tag identifier for an inventory record that you want to add, access, or modify.
 #' @param parent_tag identifier for a file that this analysis depends on.
 #' @param filename relative path from \code{inv_location} for a file that you want to add to the inventory.
@@ -285,7 +285,7 @@ thaw = function( freeze_path, alter_dependencies = F ){
 #' }
 #'
 inventory = function( inv_location = NULL, tag = NULL, filename = NULL,
-                      extra = character(0), parent_tag = "",
+                      extra = "", parent_tag = "",
                       delete = FALSE, return_all = FALSE ){
   if( !is.null( tag ) ) { assertthat::assert_that( tag!="" ) }
   assertthat::assert_that( 0==length( grep( x=extra, pattern = "\t", fixed = T ) ) )
@@ -356,20 +356,27 @@ inventory = function( inv_location = NULL, tag = NULL, filename = NULL,
       } else {
         tag = rev( make.unique( c( inv$tag, tag ) ) )[1]
         warning( paste0( "That tag is already taken. Using ", tag, " instead." ) )
-        inv = rbind(inv, list(tag=tag,
+        row_add = data.frame( tag=tag,
                               parent_tag=parent_tag,
                               date_modified = format( Sys.time(), "%Y_%b_%d|%H_%M_%S"),
                               filename=filename,
-                              extra=extra) )
+                              extra=extra )
+        print( inv )
+        print( row_add )
+        inv = rbind( inv, row_add )
       }
 
       # case tag not present
     } else {
-      inv = rbind(inv, list(tag=tag,
+      row_add = data.frame( tag=tag,
                             parent_tag=parent_tag,
                             date_modified = format( Sys.time(), "%Y_%b_%d|%H_%M_%S"),
                             filename=filename,
-                            extra=extra) )    }
+                            extra=extra )
+      print( inv )
+      print( row_add )
+      inv = rbind( inv, row_add )
+    }
     write.table( inv, inventory_path, quote = F, row.names = F, col.names = T, sep = "\t" )
   }
 }

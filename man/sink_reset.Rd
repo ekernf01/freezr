@@ -13,4 +13,3 @@ Fix a problem where nothing prints to the console after an unknown number of \co
 Many thanks to this thread:
 \url{http://stackoverflow.com/questions/18730491/sink-does-not-release-file}
 }
-

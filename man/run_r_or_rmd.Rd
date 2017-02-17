@@ -16,4 +16,3 @@ Name of input possibly with `.Rmd` changed to `.R`.
 \description{
 \code{source} code from an R or Rmarkdown file.
 }
-

@@ -4,13 +4,12 @@
 \alias{inventory}
 \title{Keep track of important items from previous analyses.}
 \usage{
-inventory(inv_location = NULL, tag = NULL, filename = NULL,
-  extra = character(0), parent_tag = "", delete = FALSE,
-  return_all = FALSE)
+inventory(inv_location = NULL, tag = NULL, filename = NULL, extra = "",
+  parent_tag = "", delete = FALSE, return_all = FALSE)
 }
 \arguments{
 \item{inv_location}{Path to the inventory you want to create, access, or modify. If possible, this arg
-defaults to the last inv_location given to `freeze`, i.e. \code{Sys.getenv()[["FREEZR_DESTINATION"]]}.}
+defaults to the parent of the last destination given to `freeze`.}
 
 \item{tag}{identifier for an inventory record that you want to add, access, or modify.}
 
@@ -49,4 +48,3 @@ Keep track of important items from previous analyses.
  and a new record will be created.}
 }
 }
-
