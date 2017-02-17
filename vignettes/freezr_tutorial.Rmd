@@ -57,6 +57,10 @@ Now you can go add notes to the file it created, and then you're free to keep it
 
 ###Inventory
 
+The problem with `freeze` is that your results folder ends up having both "spaghetti" issues (time-stamped folders everywhere with small variations on the same analysis and unclear relationships) and "lasagna" issues (results buried two or three folders deeper than where you would save them by hand.) The `inventory` helps manage this big ol' scrap-heap. It lets you pick out important results, assigning them short, easy `tag`s. Later on, you can retrieve the path to a key file or folder by referring to its `tag`.
+
+I reccomend one or two `inventory` calls per `freeze` call. More is fine, I guess, but zero inventory calls is only appropriate if nothing will ever happen downstream of that frozen analysis.
+
 Let's move into another demo folder.
 
 ```{r, warning=F}

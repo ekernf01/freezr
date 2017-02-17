@@ -331,7 +331,7 @@ inventory = function( inv_location = NULL, tag = NULL, filename = NULL,
       if( return_all ){
         return( myrow )
       } else {
-        return( myrow$filename )
+        return( file.path( inventory_path, myrow$filename ) )
       }
     }
 
