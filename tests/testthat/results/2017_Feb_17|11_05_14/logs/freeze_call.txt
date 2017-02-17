@@ -1,5 +1,5 @@
 analyses_to_run	functions_to_freeze.Rmd	script_to_freeze.R
-destination	/Users/erickernfeld/Desktop/software_projects/freezr/tests/testthat/results/2017_Feb_17|10_38_17	
+destination	/Users/erickernfeld/Desktop/software_projects/freezr/tests/testthat/results/2017_Feb_17|11_05_14	
 run_from_cryo_storage	FALSE	
 dependencies		
 seed_to_set		

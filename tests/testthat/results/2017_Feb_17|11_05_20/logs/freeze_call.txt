@@ -1,5 +1,5 @@
 analyses_to_run	script_that_fails.R
-destination	/Users/erickernfeld/Desktop/software_projects/freezr/tests/testthat/results/2017_Feb_17|10_38_20
+destination	/Users/erickernfeld/Desktop/software_projects/freezr/tests/testthat/results/2017_Feb_17|11_05_20
 run_from_cryo_storage	FALSE
 dependencies	
 seed_to_set	
