@@ -4,7 +4,8 @@
 #'
 #' @export
 #' @param analyses_to_run R or R markdown files to be run and frozen.
-#' @param destination Where to save the code (and log, and maybe dependencies)
+#' @param destination Where to save the code (and log, and maybe dependencies and output)
+#' @param capture_output If \code{"text"}, catures the console output.
 #' @param run_from_cryo_storage If \code{FALSE} (default), runs the code from the current working directory.
 #' If \code{TRUE}, runs from \code{destination} (or a folder within it -- see param \code{timestamp_as_folder}).
 #' The default option, \code{FALSE}, makes it easier to write your code because you know where it'll be run from.
@@ -102,7 +103,7 @@ freeze = function( analyses_to_run,
         }
       }
     }
-    sink()
+    sink_reset()
   }
   dev.off()
 
@@ -134,7 +135,7 @@ freeze = function( analyses_to_run,
 
   # # Save info on e.g. package versions.
   session_info = file.path( destination, "logs", "sessionInfo.txt" )
-  write( testthat::capture_output( print( sessionInfo() ) ), session_info)
+  cat( x = paste0( capture.output( sessionInfo() ), collapse = "\n"), file = session_info)
 
   # # Make log files, both human and machine readable
   freeze_call = list( analyses_to_run = analyses_to_run,
@@ -214,7 +215,7 @@ sink_reset <- function(){
 #' @param freeze_path A directory created by \code{freezr::freeze} containing these subfolders:
 #' - logs
 #' - code
-#' - output
+#' - output (optional)
 #' - dependencies (optional)
 #' - user (optional)
 #' @param use_old_dependencies Defaults to \code{FALSE}, so if your dependencies have changed, then
@@ -295,7 +296,7 @@ inventory = function( inv_location = NULL, tag = NULL, filename = NULL,
     if("FREEZR_DESTINATION" %in% names(Sys.getenv())){
       inv_location = dirname( dirname( Sys.getenv()[["FREEZR_DESTINATION"]] ) )
     } else {
-      cat("Please enter a inv_location.")
+      cat("Please enter inv_location.")
       return()
     }
   }
@@ -323,6 +324,14 @@ inventory = function( inv_location = NULL, tag = NULL, filename = NULL,
     # # If a tag is given, but no filename, retrieve or delete the entry with that tag.
   } else if( is.null( filename ) ){
     ii = which(inv$tag==tag)
+    if( length(ii) == 0 ){
+      warning( "That tag is not present. Quitting." )
+      return()
+    } else if ( length(ii) > 1 ){
+      warning( paste0( "Duplicate tag detected! This shouldn't happen. ",
+                       "If you can reproduce this issue without altering `.inventory.txt` by hand, ",
+                       "please file an issue on Github." ) )
+    }
     if( delete ){
       inv = inv[-ii, ]
       write.table( inv, inventory_path, quote = F, row.names = F, col.names = T, sep = "\t" )
@@ -348,7 +357,7 @@ inventory = function( inv_location = NULL, tag = NULL, filename = NULL,
       ii = which(inv$tag==tag)
       if( delete ) {
         warning( paste0( "Overwriting a row that currently says",
-                         inv[ii, ] ) )
+                         paste0( inv[ii, ], collapse = " \n " ) ) )
         inv[ii, "parent_tag"]    = parent_tag
         inv[ii, "date_modified"] = format( Sys.time(), "%Y_%b_%d|%H_%M_%S")
         inv[ii, "filename"] = filename
