@@ -12,7 +12,7 @@ freeze(analyses_to_run, destination, run_from_cryo_storage = FALSE,
 \arguments{
 \item{analyses_to_run}{R or R markdown files to be run and frozen.}
 
-\item{destination}{Where to save the code (and log, and maybe dependencies)}
+\item{destination}{Where to save the code (and log, and maybe dependencies and output)}
 
 \item{run_from_cryo_storage}{If \code{FALSE} (default), runs the code from the current working directory.
 If \code{TRUE}, runs from \code{destination} (or a folder within it -- see param \code{timestamp_as_folder}).
@@ -42,6 +42,8 @@ corresponding R files may be overwritten.}
 you about filling it.}
 
 \item{notes_file}{Name of file to be created while \code{chastise}ing.}
+
+\item{capture_output}{If \code{"text"}, catures the console output.}
 }
 \value{
 returns \code{destination} arg.

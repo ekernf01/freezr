@@ -10,7 +10,7 @@ thaw(freeze_path, alter_dependencies = F)
 \item{freeze_path}{A directory created by \code{freezr::freeze} containing these subfolders:
 - logs
 - code
-- output
+- output (optional)
 - dependencies (optional)
 - user (optional)}
 

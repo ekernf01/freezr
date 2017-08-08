@@ -2,5 +2,9 @@
 
 export(freeze)
 export(inventory)
+export(inventory_add)
+export(inventory_find)
+export(inventory_get)
+export(inventory_show)
 export(sink_reset)
 export(thaw)
