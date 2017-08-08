@@ -443,7 +443,7 @@ inventory_add = function( inv_location = NULL, tag = NULL, filename = NULL,
   if( tag %in% inv$tag ){
     ii = which(inv$tag==tag)
     if( force ) {
-      warning( paste0( "Overwriting a row that currently says",
+      warning( paste0( "Overwriting a row that currently says\n",
                        paste0( inv[ii, ], collapse = " \n " ) ) )
       inv[ii, "parent_tag"]    = parent_tag
       inv[ii, "date_modified"] = format( Sys.time(), "%Y_%b_%d|%H_%M_%S")
@@ -478,6 +478,36 @@ inventory_add = function( inv_location = NULL, tag = NULL, filename = NULL,
 
 
 
+
+#' Remove no-longer important items from the inventory.
+#'
+#' @export
+#' @param inv_location Path to the inventory you want to create or modify. If possible, this arg
+#'  defaults to the parent of the last destination given to `freeze`.
+#' @param tag identifier for an inventory record that you want to add.
+#' @details \code{inventory_*} functions help track data as it passes through multiple stages of analysis.
+#'  The central data structure is a table with the filename \code{.inventory.txt}. It has five
+#'  columns: \code{tag}, \code{parent_tag}, \code{date_modified}, \code{filename}, and \code{extra}.
+#'
+#' \code{inventory_rm} will remove the row with the given tag.
+#'
+inventory_rm = function( inv_location = NULL, tag = NULL ){
+
+  if( !is.null( tag ) ) { assertthat::assert_that( tag!="" ) }
+
+  inventory_path = inventory_find( inv_location )
+  inv_location = dirname( inventory_path )
+  inv = inventory_show( inv_location, make_new = T )
+
+  given_tag = tag
+  if( ! given_tag %in% inv$tag ){
+    warning("Tag not present. No action taken.")
+  }
+  inv = subset( inv, tag != given_tag)
+  write.table( inv, inventory_path, quote = F, row.names = F, col.names = T, sep = "\t" )
+}
+
+
 #' Retrieve (paths to) important items from previous analyses.
 #'
 #' @export
@@ -501,13 +531,13 @@ inventory_get = function( inv_location = NULL, tag = NULL, return_all_fields = F
     warning( "That tag is not present. Quitting." )
     return()
   } else if ( length(ii) > 1 ){
-    warning( paste0( "Duplicate tag detected! This shouldn't happen. ",
+    warning( paste0( "Duplicate tag detected! This is not supposed to happen. ",
                      "If you can reproduce this issue without altering `.inventory.txt` by hand, ",
-                     "please file an issue on Github." ) )
+                     "please contact the package maintainer." ) )
   }
 
   myrow = inv[ii, ]
-  relative = (substring(filename, 1, 1)[[1]]!=.Platform$file.sep )
+  relative = substring(myrow$filename, 1, 1)[[1]]!=.Platform$file.sep
   if(relative){
     myrow$filename = file.path( dirname( inventory_path ), myrow$filename )
   }
