@@ -1,4 +1,40 @@
 ## ------------------------------------------------------------------------
+#' Make sure everything in the inventory is actually present
+#'
+#' This function issues warnings if the inventory or any file it points to is absent. 
+#' It returns a dataframe with details, unless the inventory is absent, in which case
+#' it returns NULL.
+#'
+#' @export
+#'
+inventory_check = function( inv_location = NULL ){
+
+  # inventory_show will throw an error if the inventory's not there, but we want a warning instead.
+  inv = tryCatch( inventory_show( inv_location, make_new = F ) , 
+                  error = function(e){
+                    if( conditionMessage(e)=="There is no inventory at that location."){
+                      warning("There is no inventory at that location.")
+                      return(NULL)
+                    } else {
+                      stop(paste0("Unexpected error in inventory_show:\n", print(e)))
+                    }
+                  }  )
+  if(is.null(inv)){ return() }
+  
+  print(1)
+  inventory_path = inventory_find( inv_location )
+  inv_location = dirname( inventory_path )
+  print(2)
+  full_paths = sapply(inv$tag, inventory_get, inv_location = inv_location)
+  results = data.frame( tag = inv$tag,
+                        exists = file.exists(full_paths) | dir.exists(full_paths),
+                        full_path = full_paths ) 
+  print(3)
+  if( !all(results$exists)){
+    warning("Some of your inventory items cannot be found! \n")
+  }
+  return( results )
+}
 
 #' Keep track of important items from previous analyses.
 #'
@@ -24,7 +60,7 @@
 #'  the tag will be altered via \code{make.unique} and a new record will be created.
 #'
 #'
-inventory_add = function( inv_location = NULL, tag = NULL, filename = NULL,
+inventory_add = function( tag = NULL, inv_location = NULL, filename = NULL,
                           extra = "", parent_tag = "",
                           force = FALSE ){
 
@@ -100,7 +136,9 @@ inventory_add = function( inv_location = NULL, tag = NULL, filename = NULL,
 #'
 #' \code{inventory_rm} will remove the row with the given tag.
 #'
-inventory_rm = function( inv_location = NULL, tag = NULL ){
+#' @export 
+#'
+inventory_rm = function( tag = NULL, inv_location = NULL ){
 
   if( !is.null( tag ) ) { assertthat::assert_that( tag!="" ) }
 
@@ -131,7 +169,7 @@ inventory_rm = function( inv_location = NULL, tag = NULL ){
 #' \code{inventory_get} looks for this table at the \code{inv_location} you specify. Any record matching
 #'  the tag you give will be returned.
 #'
-inventory_get = function( inv_location = NULL, tag = NULL, return_all_fields = FALSE ){
+inventory_get = function( tag = NULL, inv_location = NULL, return_all_fields = FALSE ){
   inventory_path = inventory_find( inv_location )
   inv = inventory_show( inv_location )
 
@@ -259,7 +297,7 @@ inventory_find = function( inv_location = NULL ){
 #'  and a new record will be created.}
 #' }
 #'
-inventory = function( inv_location = NULL, tag = NULL, filename = NULL,
+inventory = function( tag = NULL, inv_location = NULL, filename = NULL,
                       extra = "", parent_tag = "",
                       delete = FALSE, return_all = FALSE ){
   warning("inventory() is deprecated. 
