@@ -1,1 +1,0 @@
-This is a super-critical thing without which my analysis is utterly irreproducible.

@@ -32,7 +32,7 @@ Keep track of important items from previous analyses.
  The central data structure is a table with the filename \code{.inventory.txt}. It has five
  columns: \code{tag}, \code{parent_tag}, \code{date_modified}, \code{filename}, and \code{extra}.
 
-\code{inventory_add} looks for this table at the \code{inv_location} you specify and creates a new one if needed.
+\code{inventory_add} looks for this table at the \code{inv_location} you specify.
 \code{inventory_add} will add a row with the given tag. If that tag is present already and
  \code{force==TRUE}, the record will be altered. If the tag is present but \code{force==FALSE},
  the tag will be altered via \code{make.unique} and a new record will be created.

@@ -20,7 +20,7 @@
 #'  The central data structure is a table with the filename \code{.inventory.txt}. It has five
 #'  columns: \code{tag}, \code{parent_tag}, \code{date_modified}, \code{filename}, and \code{extra}.
 #'
-#' \code{inventory_add} looks for this table at the \code{inv_location} you specify and creates a new one if needed.
+#' \code{inventory_add} looks for this table at the \code{inv_location} you specify.
 #' \code{inventory_add} will add a row with the given tag. If that tag is present already and
 #'  \code{force==TRUE}, the record will be altered. If the tag is present but \code{force==FALSE},
 #'  the tag will be altered via \code{make.unique} and a new record will be created.
@@ -35,11 +35,11 @@ inventory_add = function( tag = NULL, inv_location = NULL, filename = NULL,
     stop("Sorry, inventories are tab-delimited. `extra` field may not contain tabs.")
   }
 
-  inventory_path = inventory_find( inv_location )
-  inv_location = dirname( inventory_path )
-  inv = inventory_show( inv_location, make_new = T )
+  inv = inventory_show( inv_location )
+  inventory_path = inventory_find( inv_location ) 
+  inv_location = dirname(inventory_path)
 
-  # # As a courtesy, check whether filename exists.
+  # # Check whether filename exists.
   relative = (substring(filename, 1, 1)[[1]]!=.Platform$file.sep )
   if( relative ){
     filename_full = file.path( inv_location, filename )
@@ -50,7 +50,7 @@ inventory_add = function( tag = NULL, inv_location = NULL, filename = NULL,
     warning( paste0("The file you're adding, ", filename_full, ", does not exist! Adding it anyway.\n") )
   }
 
-  # case tag already present
+  # if tag already present
   if( tag %in% inv$tag ){
     ii = which(inv$tag==tag)
     if( force ) {
@@ -68,20 +68,15 @@ inventory_add = function( tag = NULL, inv_location = NULL, filename = NULL,
                             date_modified = format( Sys.time(), "%Y_%b_%d|%H_%M_%S"),
                             filename=filename,
                             extra=extra )
-      print( inv )
-      print( row_add )
       inv = rbind( inv, row_add )
     }
-
-  # case tag not present
+  # if tag not present
   } else {
     row_add = data.frame( tag=tag,
                           parent_tag=parent_tag,
                           date_modified = format( Sys.time(), "%Y_%b_%d|%H_%M_%S"),
                           filename=filename,
                           extra=extra )
-    print( inv )
-    print( row_add )
     inv = rbind( inv, row_add )
   }
   write.table( inv, inventory_path, quote = F, row.names = F, col.names = T, sep = "\t" )
@@ -164,11 +159,43 @@ inventory_get = function( tag = NULL, inv_location = NULL, return_all_fields = F
 }
 
 
+#' Make a new inventory.
+#'
+#' @export
+#' @param inv_location Path to the inventory you want to create, access, or modify. If possible, this arg
+#'  defaults to the parent of the last destination given to `freeze`.
+#' @details \code{inventory_*} functions help organize data as it passes through multiple stages of analysis.
+#'  The central data structure is a table with the filename \code{.inventory.txt}. It has five
+#'  columns: \code{tag}, \code{parent_tag}, \code{date_modified}, \code{filename}, and \code{extra}.
+#'
+#' \code{inventory_make} will make an inventory at the specified location unless there's one already.
+#'
+inventory_make = function( inv_location ){
+  if( length(inv_location) == 0)(stop("There is no default location for inventory_make; you must supply one explicitly."))
+   if( inventory_find( inv_location = inv_location, return_existence_logical = TRUE ) ){
+    stop(paste0("There is already an inventory at that location (or a superdirectory).\n",
+                "Nested inventories are not supported, and they may never be.\n"))
+  }
+  else {
+    inv = data.frame( tag=as.Date( character() ),
+                      filename=character(),
+                      parent_tag=character(),
+                      date_modified=character(),
+                      extra=character(),
+                      stringsAsFactors=FALSE )
+    if(!dir.exists(inv_location)) {
+      dir.create(inv_location, recursive = T)
+      assertthat::assert_that(dir.exists(inv_location))
+    }
+    write.table( inv, file.path(inv_location, ".inventory.txt"), quote = F, row.names = F, col.names = T, sep = "\t" ) 
+  }
+  return()
+}
 
 #' Return an entire inventory.
 #'
 #' @export
-#' @param make_new If \code{make_new==TRUE} and if \code{inv_location} is empty, a new inventory will be created.
+#' @param make_new Deprecated; use inventory_make instead. 
 #' @param inv_location Path to the inventory you want to create, access, or modify. If possible, this arg
 #'  defaults to the parent of the last destination given to `freeze`.
 #' @details \code{inventory_*} functions help organize data as it passes through multiple stages of analysis.
@@ -179,25 +206,12 @@ inventory_get = function( tag = NULL, inv_location = NULL, return_all_fields = F
 #'
 inventory_show = function( inv_location = NULL, make_new = FALSE ){
 
-  inventory_path = inventory_find( inv_location )
-
-  # What if it's not there?
-  if( !file.exists( inventory_path ) ){
-    if( make_new ){
-      cat("There is no inventory at that location. Making an empty one now. \n\n")
-      inv = data.frame( tag=as.Date( character() ),
-                        filename=character(),
-                        parent_tag=character(),
-                        date_modified=character(),
-                        extra=character(),
-                        stringsAsFactors=FALSE )
-      write.table( inv, inventory_path, quote = F, row.names = F, col.names = T, sep = "\t" )
-    } else{
-      stop("There is no inventory at that location.")
-    }
+  if(make_new){ 
+    warning("The make_new argument of inventory_show is deprecated. Use inventory_make instead.")
+    inventory_make(inv_location)
   }
-
-  # # Guarantees that what you see is fresh off the hard disk.
+  
+  inventory_path = inventory_find( inv_location ) 
   inv = read.table( inventory_path, header = T, sep = "\t", stringsAsFactors = F )
   return( inv )
 }
@@ -205,7 +219,9 @@ inventory_show = function( inv_location = NULL, make_new = FALSE ){
 #' Locate your inventory.
 #'
 #' @export
-#' @param inv_location Path to the inventory you want to create, access, or modify. If possible, this arg
+#' @param return_existence_logical If TRUE, return a bool indicating whether the inventory can be found.
+#' @param inv_location Path to the inventory you want to create, access, or modify, or to its parent folder, or to
+#'  any folder below that (as long as none of them contain other inventories). When possible, this arg
 #'  defaults to the parent of the last destination given to `freeze`.
 #' @details \code{inventory_*} functions help organize data as it passes through multiple stages of analysis.
 #'  The central data structure is a table with the filename \code{.inventory.txt}. It has five
@@ -213,20 +229,41 @@ inventory_show = function( inv_location = NULL, make_new = FALSE ){
 #'
 #' \code{inventory_find} helps locate the inventory.
 #'
-inventory_find = function( inv_location = NULL ){
-
-  # # Defaults to last inv_location given to freezr::freeze
+inventory_find = function( inv_location = NULL, return_existence_logical = FALSE ){
+  
+  # Deal with input. Postcondition: look_in is a file that exists.
   if( is.null( inv_location ) ){
     if("FREEZR_DESTINATION" %in% names(Sys.getenv())){
-      inv_location = dirname( dirname( Sys.getenv()[["FREEZR_DESTINATION"]] ) )
+      look_in = Sys.getenv()[["FREEZR_DESTINATION"]] 
     } else {
-      stop("Please enter inv_location; default not available.")
-      return()
+      if(return_existence_logical){return(FALSE)}
+      stop("Grumble! Please enter inv_location; default not available.\n")
+    }
+  } else {
+    look_in = c( inv_location, dirname( inv_location ) )
+    if( !any( dir.exists( look_in ) ) ){
+      if(return_existence_logical){return(FALSE)}
+      stop("Grumble! For inv_location, the folder you specified does not exist.\n")
+    } else {
+      look_in = inv_location
     }
   }
-
-  inventory_path = file.path( inv_location, ".inventory.txt" )
-  return( inventory_path )
+  
+  # # Searches from last inv_location given to freezr::freeze, descending the file tree.
+  while(TRUE){
+    inventory_path = file.path( look_in, ".inventory.txt" )
+    if( file.exists( inventory_path ) ){
+      if(return_existence_logical){return(TRUE)}
+      return( inventory_path )
+    } else if( look_in == dirname(look_in) ) {
+      if(return_existence_logical){return(FALSE)}
+      stop("Uh oh! No inventory found in any superdirectory of the inv_location you specified. Try inventory_make. \n" )
+    } else {
+      look_in = dirname(look_in)
+    }
+  }
+  if(return_existence_logical){return(FALSE)}
+  stop("Please enter inv_location; default not available.")
 }
 
 
@@ -307,7 +344,7 @@ inventory_check = function( inv_location = NULL ){
 inventory = function( tag = NULL, inv_location = NULL, filename = NULL,
                       extra = "", parent_tag = "",
                       delete = FALSE, return_all = FALSE ){
-  warning("inventory() is deprecated. 
+  warning("inventory() is deprecated. Things got crazy.
           \nUse inventory_add, inventory_get, inventory_rm, inventory_show, or inventory_find. ")
   if( !is.null( tag ) ) { assertthat::assert_that( tag!="" ) }
   assertthat::assert_that( 0==length( grep( x=extra, pattern = "\t", fixed = T ) ) )

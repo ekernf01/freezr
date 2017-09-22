@@ -162,7 +162,7 @@ freeze = function( analyses_to_run,
 
 
 ## ------------------------------------------------------------------------
-#' Check frozen dependencies for changes
+#' Check frozen dependencies for changes.
 #'
 #' @export
 #'
@@ -207,7 +207,7 @@ check_dependencies = function( freeze_path = dirname( Sys.getenv( "FREEZR_DESTIN
   return( deps )
 }
 
-#' Run an analysis previously frozen by \code{freezr::freeze}. NOT GUARANTEED TO WORK but it does its best.
+#' Run an analysis previously frozen by \code{freezr::freeze}. 
 #'
 #' @export
 #' @param freeze_path A directory created by \code{freezr::freeze} containing these subfolders:
@@ -236,9 +236,11 @@ thaw = function( freeze_path, thaw_path = NULL, verbose = T ){
   
   # # Check environment for changes
   
-  # #   
+  
+  # # Check dependencies for changes
   if( !is.null( freeze_call$dependencies) )
   {
+    check_dependencies(freeze_path = freeze_path )
   } else {
     deps = NULL
   }

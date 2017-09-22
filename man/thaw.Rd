@@ -2,7 +2,7 @@
 % Please edit documentation in R/freezr.R
 \name{thaw}
 \alias{thaw}
-\title{Run an analysis previously frozen by \code{freezr::freeze}. NOT GUARANTEED TO WORK but it does its best.}
+\title{Run an analysis previously frozen by \code{freezr::freeze}.}
 \usage{
 thaw(freeze_path, thaw_path = NULL, verbose = T)
 }
@@ -15,5 +15,5 @@ thaw(freeze_path, thaw_path = NULL, verbose = T)
 - dependencies (optional)}
 }
 \description{
-Run an analysis previously frozen by \code{freezr::freeze}. NOT GUARANTEED TO WORK but it does its best.
+Run an analysis previously frozen by \code{freezr::freeze}.
 }

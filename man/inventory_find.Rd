@@ -4,11 +4,14 @@
 \alias{inventory_find}
 \title{Locate your inventory.}
 \usage{
-inventory_find(inv_location = NULL)
+inventory_find(inv_location = NULL, return_existence_logical = FALSE)
 }
 \arguments{
-\item{inv_location}{Path to the inventory you want to create, access, or modify. If possible, this arg
+\item{inv_location}{Path to the inventory you want to create, access, or modify, or to its parent folder, or to
+any folder below that (as long as none of them contain other inventories). When possible, this arg
 defaults to the parent of the last destination given to `freeze`.}
+
+\item{return_existence_logical}{If TRUE, return a bool indicating whether the inventory can be found.}
 }
 \description{
 Locate your inventory.

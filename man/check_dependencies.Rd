@@ -2,10 +2,10 @@
 % Please edit documentation in R/freezr.R
 \name{check_dependencies}
 \alias{check_dependencies}
-\title{Check frozen dependencies for changes}
+\title{Check frozen dependencies for changes.}
 \usage{
 check_dependencies(freeze_path = dirname(Sys.getenv("FREEZR_DESTINATION")))
 }
 \description{
-Check frozen dependencies for changes
+Check frozen dependencies for changes.
 }
