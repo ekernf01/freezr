@@ -67,7 +67,7 @@ freeze = function( analyses_to_run,
   }
 
   # # Prepare and announce destination
-  destination = file.path( destination, format( Sys.time(), "%Y_%b_%d|%H_%M_%S") )
+  destination = file.path( destination, format( Sys.time(), "%Y_%b_%d__%H_%M_%S") )
   dir.create( destination, recursive = TRUE )
   empty = ( 0 == length( list.files( destination, all.files = TRUE, include.dirs = TRUE, no.. = TRUE ) ) )
   if( file.exists( destination ) && !empty && !force ){

@@ -214,12 +214,29 @@ inventory_show = function( inv_location = NULL, make_new = FALSE ){
   return( inv )
 }
 
+
+#' Locate your inventory.
+#'
+#' @export
+#' @param inv_location Path to the inventory you think might exist, or to its parent folder, or to
+#'  any folder above that (as long as none of them contain other inventories). When possible, this arg
+#'  defaults to the parent of the last destination given to `freeze`.
+#' @details \code{inventory_*} functions help organize data as it passes through multiple stages of analysis.
+#'  The central data structure is a table with the filename \code{.inventory.txt}. It has five
+#'  columns: \code{tag}, \code{parent_tag}, \code{date_modified}, \code{filename}, and \code{extra}.
+#'
+#' \code{inventory_exists} assesses whether an inventory is accessible from the specified location.
+#'
+inventory_exists = function( inv_location = NULL ){
+  inventory_find( inv_location = inv_location, return_existence_logical = TRUE)
+}
+  
 #' Locate your inventory.
 #'
 #' @export
 #' @param return_existence_logical If TRUE, return a bool indicating whether the inventory can be found.
 #' @param inv_location Path to the inventory you want to create, access, or modify, or to its parent folder, or to
-#'  any folder below that (as long as none of them contain other inventories). When possible, this arg
+#'  any folder above that (as long as none of them contain other inventories). When possible, this arg
 #'  defaults to the parent of the last destination given to `freeze`.
 #' @details \code{inventory_*} functions help organize data as it passes through multiple stages of analysis.
 #'  The central data structure is a table with the filename \code{.inventory.txt}. It has five
