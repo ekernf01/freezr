@@ -4,10 +4,12 @@
 
 #' \code{source} code from an R or Rmarkdown file.
 #'
+#' @param destination Goes into the FREEZR_DESTINATION environmental variable.
+#' @param purl_aggressively If TRUE, don't worry about overwriting R files when purling.
 #' @param file_name An RMarkdown file or an R file to be (\code{purl}ed and) run.
 #' The file gets run **from the directory it is in**, not from \code{getwd()}.
 #' @return Name of input possibly with `.Rmd` changed to `.R`.
-run_r_or_rmd = function( file_name, destination ) {
+run_r_or_rmd = function( file_name, destination, purl_aggressively ) {
   name_ext = strsplit( x = file_name, split = ".", fixed = TRUE)[[1]]
   ext = name_ext[ length( name_ext ) ]
   name_dot_R = paste( c( name_ext[ -length( name_ext ) ], "R"), collapse = "." )
@@ -32,10 +34,14 @@ run_r_or_rmd = function( file_name, destination ) {
 }
 
 #' Turn a ragged list of atomic vectors to a rectangle by adding filler.
+#'
+#' @param x Ragged list
+#' @param filler What to put in the new entries.
+#'
 pad_list = function( x, filler = "" ){
   n = max(sapply(x, length))
   pad_vec = function( v ){ c( v, rep( filler, n - length( v ) ) )}
-  x = setNames( lapply( x, pad_vec ), names( x ) )
+  x = stats::setNames( lapply( x, pad_vec ), names( x ) )
   return( x )
 }
 

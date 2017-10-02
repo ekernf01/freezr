@@ -77,7 +77,7 @@ inventory_add = function( tag = NULL, inv_location = NULL, filename = NULL,
                           extra=extra )
     inv = rbind( inv, row_add )
   }
-  write.table( inv, inventory_path, quote = F, row.names = F, col.names = T, sep = "\t" )
+  utils::write.table( inv, inventory_path, quote = F, row.names = F, col.names = T, sep = "\t" )
 }
 
 
@@ -110,7 +110,7 @@ inventory_rm = function( tag = NULL, inv_location = NULL ){
     warning("Tag not present. No action taken.")
   }
   inv = subset( inv, tag != given_tag)
-  write.table( inv, inventory_path, quote = F, row.names = F, col.names = T, sep = "\t" )
+  utils::write.table( inv, inventory_path, quote = F, row.names = F, col.names = T, sep = "\t" )
 }
 
 
@@ -185,7 +185,7 @@ inventory_make = function( inv_location ){
       dir.create(inv_location, recursive = T)
       assertthat::assert_that(dir.exists(inv_location))
     }
-    write.table( inv, file.path(inv_location, ".inventory.txt"), quote = F, row.names = F, col.names = T, sep = "\t" ) 
+    utils::write.table( inv, file.path(inv_location, ".inventory.txt"), quote = F, row.names = F, col.names = T, sep = "\t" ) 
   }
   return()
 }
@@ -210,7 +210,7 @@ inventory_show = function( inv_location = NULL, make_new = FALSE ){
   }
   
   inventory_path = inventory_find( inv_location ) 
-  inv = read.table( inventory_path, header = T, sep = "\t", stringsAsFactors = F )
+  inv = utils::read.table( inventory_path, header = T, sep = "\t", stringsAsFactors = F )
   return( inv )
 }
 
@@ -284,6 +284,8 @@ inventory_find = function( inv_location = NULL, return_existence_logical = FALSE
 
 #' Make sure everything in the inventory is actually present
 #'
+#' @param inv_location Where to look for the inventory.
+#' 
 #' This function issues warnings if the inventory or any file it points to is absent. 
 #' It returns a dataframe with details, unless the inventory is absent, in which case
 #' it returns NULL.
@@ -318,11 +320,49 @@ inventory_check = function( inv_location = NULL ){
   return( results )
 }
 
+#' Copy all files listed in the inventory to the specified target location.
+#'
+#' @param inv_location Where to look for the inventory.
+#' @param target_location The stuff gets put in <target_location>/inventory. 
+#' To avoid copying ridiculous long file paths, files are renamed as "tag.ext" so that 
+#' the new filename is the tag but the old extension (anything after the last period) is preserved. 
+#' @param overwrite Passed to file.copy and also checked before (over)writing the new .inventory file.
+#'
+#' @export
+#'
+inventory_transfer = function( inv_location = NULL, target_location, overwrite = F ){
+  inventory_check(inv_location)
+  new_inv_location = file.path(target_location, "inventory")
+  old_inv = new_inv = inventory_show( inv_location )
+  extension = gsub(x = old_inv$filename, pattern = "^.*\\.", replacement = "")
+  new_inv$filename = paste0(old_inv$tag, extension, sep = ".")
+  new_inv$filename = file.path( new_inv_location, new_inv$filename )
+  for( i in seq_along( new_inv$tag )){
+    it_worked = file.copy(from = old_inv$filename[i], to = new_inv$filename[i], overwrite = overwrite, copy.mode = T )
+    if( !it_worked ){
+      warning( "file.copy returned FALSE.")
+    }
+  }
+  new_inv_path = file.path(new_inv_location, ".inventory")
+  if(file.exists(new_inv_path)){
+    my_msg = paste0(new_inv_path, " already exists.\n")
+    if( overwrite ){
+      warning( my_msg )
+    } else {
+      stop( my_msg )
+    }
+  }
+  utils::write.table( new_inv, new_inv_path, 
+               quote = F, row.names = F, col.names = T, sep = "\t" )
+  return()
+}
+
 
 ## ------------------------------------------------------------------------
 #' Keep track of important items from previous analyses.
 #'
 #' @export
+#'
 #' @param inv_location Path to the inventory you want to create, access, or modify. If possible, this arg
 #'  defaults to the parent of the last destination given to `freeze`.
 #' @param tag identifier for an inventory record that you want to add, access, or modify.
@@ -381,9 +421,9 @@ inventory = function( tag = NULL, inv_location = NULL, filename = NULL,
                       date_modified=character(),
                       extra=character(),
                       stringsAsFactors=FALSE )
-    write.table( inv, inventory_path, quote = F, row.names = F, col.names = T, sep = "\t" )
+    utils::write.table( inv, inventory_path, quote = F, row.names = F, col.names = T, sep = "\t" )
   } else {
-    inv = read.table( inventory_path, header = T, sep = "\t", stringsAsFactors = F )
+    inv = utils::read.table( inventory_path, header = T, sep = "\t", stringsAsFactors = F )
   }
 
   # # If no tag is given, return the inventory.
@@ -404,7 +444,7 @@ inventory = function( tag = NULL, inv_location = NULL, filename = NULL,
     }
     if( delete ){
       inv = inv[-ii, ]
-      write.table( inv, inventory_path, quote = F, row.names = F, col.names = T, sep = "\t" )
+      utils::write.table( inv, inventory_path, quote = F, row.names = F, col.names = T, sep = "\t" )
     } else {
       myrow = inv[ii, ]
       if( return_all ){
@@ -456,7 +496,7 @@ inventory = function( tag = NULL, inv_location = NULL, filename = NULL,
       print( row_add )
       inv = rbind( inv, row_add )
     }
-    write.table( inv, inventory_path, quote = F, row.names = F, col.names = T, sep = "\t" )
+    utils::write.table( inv, inventory_path, quote = F, row.names = F, col.names = T, sep = "\t" )
   }
 }
 

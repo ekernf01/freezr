@@ -29,9 +29,10 @@
 #' @param notes_file Name of file to be created while \code{chastise}ing.
 #' @return returns \code{destination} arg.
 #' @examples
-#' setwd( file.path( "~", "my_project" ) )
-#' freeze(analyses_to_run = c( "my_functions.Rmd", "my_script.R" ),
-#'        destination = file.path("~", "my_project", "results") )
+#' 
+#' #setwd( file.path( "~", "my_freezr_example_project", "scripts" ), )
+#' #freeze( analyses_to_run = c( "my_functions.Rmd", "my_script.R" ),
+#' #        destination = file.path("~", "my_freezr_example_project", "results") )
 freeze = function( analyses_to_run,
                    destination,
                    run_from_cryo_storage = FALSE,
@@ -83,7 +84,7 @@ freeze = function( analyses_to_run,
   dir.create( file.path( destination, "code" ) )
   dir.create( file.path( destination, "logs" ) )
   graphics_out = file.path( destination, "output", "graphics.pdf" )
-  pdf( graphics_out )
+  grDevices::pdf( graphics_out )
   {
     outfile = file.path( destination, "output", "text.txt" )
     file.create( outfile )
@@ -97,16 +98,16 @@ freeze = function( analyses_to_run,
         if( run_from_cryo_storage ){
           old_wd = getwd()
           setwd( destination )
-          try( expr = { freezr:::run_r_or_rmd( frozen_analysis_i, destination ) } )
+          try( expr = { run_r_or_rmd( frozen_analysis_i, destination ) } )
           setwd( old_wd )
         } else {
-          try( expr = { freezr:::run_r_or_rmd( frozen_analysis_i, destination ) } )
+          try( expr = { run_r_or_rmd( frozen_analysis_i, destination ) } )
         }
       }
     }
     sink_reset()
   }
-  dev.off()
+  grDevices::dev.off()
 
   # # copy dependencies
   if( !is.null( dependencies) )
@@ -136,7 +137,7 @@ freeze = function( analyses_to_run,
 
   # # Save info on e.g. package versions.
   session_info = file.path( destination, "logs", "sessionInfo.txt" )
-  cat( x = paste0( capture.output( sessionInfo() ), collapse = "\n"), file = session_info)
+  cat( x = paste0( utils::capture.output( utils::sessionInfo() ), collapse = "\n"), file = session_info)
 
   # # Make log files, both human and machine readable
   freeze_call = list( analyses_to_run = analyses_to_run,
@@ -152,101 +153,103 @@ freeze = function( analyses_to_run,
                       notes_file = notes_file )
   logfile = file.path( destination, "logs", "freeze_call.txt" )
   saveRDS( freeze_call, file.path( destination, "logs", "freeze_call_RDS.data" ) )
-  write.table( getwd(), file.path( destination, "logs", "freeze_call_wd.txt" ),
+  utils::write.table( getwd(), file.path( destination, "logs", "freeze_call_wd.txt" ),
                quote = FALSE, row.names = FALSE, col.names = FALSE )
-  write.table( x = t( as.data.frame( freezr:::pad_list( freeze_call ) ) ),
+  utils::write.table( x = t( as.data.frame( pad_list( freeze_call ) ) ),
                file = logfile,
                quote = FALSE, col.names = FALSE, sep = "\t" )
   return( invisible( destination ) )
 }
 
 
-## ------------------------------------------------------------------------
-#' Check frozen dependencies for changes.
-#'
-#' @export
-#'
-check_dependencies = function( freeze_path = dirname( Sys.getenv( "FREEZR_DESTINATION" ) ) ) {
-  # Set up output path
-  timestamp = format( Sys.time(), "%Y_%b_%d|%H_%M_%S") 
-  dep_check_res_path = file.path( freeze_path, "dependency_diffs", timestamp ) 
-  suppressWarnings( dir.create( dep_check_res_path ) ) 
-  
-  # Retrieve recorded dependencies
-  freeze_call = readRDS( file.path( freeze_path, "logs", "freeze_call_RDS.data" ) )
-  dependencies = freeze_call$dependencies
-  deps = data.frame( name = unlist( lapply( dependencies, basename ) ),
-                     size_kb = unlist( lapply( dependencies, file.size ) ) / 1000,
-                     full_path = dependencies,
-                     orig_exists = rep(NA, length(dependencies)),
-                     orig_still_identical = rep(NA, length(dependencies)),
-                     pct_diff = rep(NA, length(dependencies)),
-                     stringsAsFactors = FALSE)
-  
-  # Go through each file and compare frozen version with current version.
-  for( ii in seq_along( deps$name ) ){
-    orig   = deps$full_path[[ii]]
-    frozen = file.path( "dependencies", deps$name[[ii]] )
-    if( !file.exists(orig)){
-      deps$orig_exists[[i]] = F
-      deps$orig_still_identical[[i]] = F
-      deps$pct_diff[[i]] = 0
-    } else if( tools::md5sum(frozen) == tools::md5sum(orig) ){
-      deps$orig_exists[[i]] = T
-      deps$orig_still_identical[[i]] = T
-      deps$pct_diff[[i]] = 0
-    } else {
-      diffs = diffobj::diffFile( target = orig, current = frozen, format = raw )
-      diffs = strsplit(capture_output(show(diffs)), "\n")[[1]]
-      write.table( diffs, dep_check_res_path, row.names = F, col.names = F, quote = F)
-      deps$orig_exists[[i]] = T
-      deps$orig_still_identical[[i]] = F
-      deps$pct_diff[[i]] = length( diffs ) / ( length( readlines( orig ) ) + length( readlines( frozen ) ) )
-    }
-  }
-  return( deps )
-}
-
-#' Run an analysis previously frozen by \code{freezr::freeze}. 
-#'
-#' @export
-#' @param freeze_path A directory created by \code{freezr::freeze} containing these subfolders:
-#' - logs
-#' - code
-#' - output 
-#' - user 
-#' - dependencies (optional)
-#' 
-thaw = function( freeze_path, thaw_path = NULL, verbose = T ){
-  warning("Thaw is not working yet. Stay tuned!")
-  return()
-
-  # # Retrieve original call to freezr::freeze
-  freeze_call = readRDS( file.path( freeze_path, "logs", "freeze_call_RDS.data" ) )
-  thaw_call = freeze_call
-
-  # # Execute freezr::freeze call as done originally
-  setwd( readLines(file.path(freeze_call$destination, "logs", "freeze_call_wd.txt")) ) 
-  if( if.null( thaw_path ) ){
-    thaw_call$destination = file.path( thaw_call$destination, "thaw" )
-  } else {
-    thaw_call$destination = thaw_path
-  }
-  do.call( what = freezr::freeze, args = thaw_call )
-  
-  # # Check environment for changes
-  
-  
-  # # Check dependencies for changes
-  if( !is.null( freeze_call$dependencies) )
-  {
-    check_dependencies(freeze_path = freeze_path )
-  } else {
-    deps = NULL
-  }
-  
-  # # Put thaw report in folder with re-frozen results
-  Sys.getenv("FREEZR_DESTINATION")
-}
-
+## ---- eval = F-----------------------------------------------------------
+## #' Check frozen dependencies for changes.
+## #'
+## #' @param freeze_path Location of the freezr archive you want to check.
+## #'
+## #' @export
+## #'
+## check_dependencies = function( freeze_path = dirname( Sys.getenv( "FREEZR_DESTINATION" ) ) ) {
+##   # Set up output path
+##   timestamp = format( Sys.time(), "%Y_%b_%d|%H_%M_%S")
+##   dep_check_res_path = file.path( freeze_path, "dependency_diffs", timestamp )
+##   suppressWarnings( dir.create( dep_check_res_path ) )
+## 
+##   # Retrieve recorded dependencies
+##   freeze_call = readRDS( file.path( freeze_path, "logs", "freeze_call_RDS.data" ) )
+##   dependencies = freeze_call$dependencies
+##   deps = data.frame( name = unlist( lapply( dependencies, basename ) ),
+##                      size_kb = unlist( lapply( dependencies, file.size ) ) / 1000,
+##                      full_path = dependencies,
+##                      orig_exists = rep(NA, length(dependencies)),
+##                      orig_still_identical = rep(NA, length(dependencies)),
+##                      pct_diff = rep(NA, length(dependencies)),
+##                      stringsAsFactors = FALSE)
+## 
+##   # Go through each file and compare frozen version with current version.
+##   for( ii in seq_along( deps$name ) ){
+##     orig   = deps$full_path[[ii]]
+##     frozen = file.path( "dependencies", deps$name[[ii]] )
+##     if( !file.exists(orig)){
+##       deps$orig_exists[[ii]] = F
+##       deps$orig_still_identical[[ii]] = F
+##       deps$pct_diff[[ii]] = 0
+##     } else if( tools::md5sum(frozen) == tools::md5sum(orig) ){
+##       deps$orig_exists[[ii]] = T
+##       deps$orig_still_identical[[ii]] = T
+##       deps$pct_diff[[ii]] = 0
+##     } else {
+##       diffs = diffobj::diffFile( target = orig, current = frozen, format = raw )
+##       diffs = strsplit(utils::capture.output(show(diffs)), "\n")[[1]]
+##       utils::write.table( diffs, dep_check_res_path, row.names = F, col.names = F, quote = F)
+##       deps$orig_exists[[ii]] = T
+##       deps$orig_still_identical[[ii]] = F
+##       deps$pct_diff[[ii]] = length( diffs ) / ( length( readlines( orig ) ) + length( readlines( frozen ) ) )
+##     }
+##   }
+##   return( deps )
+## }
+## 
+## #' Run an analysis previously frozen by \code{freezr::freeze}.
+## #'
+## #' @export
+## #' @param freeze_path A directory created by \code{freezr::freeze} containing these subfolders:
+## #' - logs
+## #' - code
+## #' - output
+## #' - user
+## #' - dependencies (optional)
+## #'
+## thaw = function( freeze_path, thaw_path = NULL, verbose = T ){
+##   warning("Thaw is not working yet. Stay tuned!")
+##   return()
+## 
+##   # # Retrieve original call to freezr::freeze
+##   freeze_call = readRDS( file.path( freeze_path, "logs", "freeze_call_RDS.data" ) )
+##   thaw_call = freeze_call
+## 
+##   # # Execute freezr::freeze call as done originally
+##   setwd( readLines(file.path(freeze_call$destination, "logs", "freeze_call_wd.txt")) )
+##   if( is.null( thaw_path ) ){
+##     thaw_call$destination = file.path( thaw_call$destination, "thaw" )
+##   } else {
+##     thaw_call$destination = thaw_path
+##   }
+##   do.call( what = freezr::freeze, args = thaw_call )
+## 
+##   # # Check environment for changes
+## 
+## 
+##   # # Check dependencies for changes
+##   if( !is.null( freeze_call$dependencies) )
+##   {
+##     check_dependencies(freeze_path = freeze_path )
+##   } else {
+##     deps = NULL
+##   }
+## 
+##   # # Put thaw report in folder with re-frozen results
+##   Sys.getenv("FREEZR_DESTINATION")
+## }
+## 
 

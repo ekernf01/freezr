@@ -7,10 +7,6 @@ Sys.sleep(2) #time stamps have a 1-second resolution, so need this to avoid coll
 freezr::freeze( analyses_to_run = c( "script_that_fails.R" ),
                 destination = file.path(getwd(), "results") )
 
-# Basic thaw test
-Sys.sleep(2) #time stamps have a 1-second resolution, so need this to avoid collisions.
-freezr::thaw( test_dest )
-
 # Test with code files further down in the working directory
 my_basename = basename(getwd())
 setwd("..")

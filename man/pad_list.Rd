@@ -6,6 +6,11 @@
 \usage{
 pad_list(x, filler = "")
 }
+\arguments{
+\item{x}{Ragged list}
+
+\item{filler}{What to put in the new entries.}
+}
 \description{
 Turn a ragged list of atomic vectors to a rectangle by adding filler.
 }

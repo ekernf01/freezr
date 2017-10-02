@@ -4,11 +4,15 @@
 \alias{run_r_or_rmd}
 \title{\code{source} code from an R or Rmarkdown file.}
 \usage{
-run_r_or_rmd(file_name, destination)
+run_r_or_rmd(file_name, destination, purl_aggressively)
 }
 \arguments{
 \item{file_name}{An RMarkdown file or an R file to be (\code{purl}ed and) run.
 The file gets run **from the directory it is in**, not from \code{getwd()}.}
+
+\item{destination}{Goes into the FREEZR_DESTINATION environmental variable.}
+
+\item{purl_aggressively}{If TRUE, don't worry about overwriting R files when purling.}
 }
 \value{
 Name of input possibly with `.Rmd` changed to `.R`.

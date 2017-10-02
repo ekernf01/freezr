@@ -6,8 +6,13 @@
 \usage{
 inventory_check(inv_location = NULL)
 }
-\description{
+\arguments{
+\item{inv_location}{Where to look for the inventory.
+
 This function issues warnings if the inventory or any file it points to is absent. 
 It returns a dataframe with details, unless the inventory is absent, in which case
-it returns NULL.
+it returns NULL.}
+}
+\description{
+Make sure everything in the inventory is actually present
 }

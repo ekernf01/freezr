@@ -24,17 +24,17 @@ clean_up_inv = function(){
 # # Testing
 clean_up_inv()
 test_that( "deprecated inventory call still works (Test with no args)",
-                     {expect_warning(freezr::inventory())})
+                     {expect_warning(inventory())})
 test_that( "deprecated inventory call still works (Test with essential args)",
-                     {expect_warning(freezr::inventory( tag="my_dummy_output", filename=f1 ))})
+                     {expect_warning(inventory( tag="my_dummy_output", filename=f1 ))})
 test_that( "deprecated inventory call still works (Test with parent_tag arg)",
-                     {expect_warning(freezr::inventory( tag="my_dummy_output_3",
+                     {expect_warning(inventory( tag="my_dummy_output_3",
                                                         filename = f1,
                                                         parent_tag = "my_dummy_output_2" ))})
 test_that("deprecated inventory call still works (Test with incorrect arg)",
-          {expect_warning(freezr::inventory( tag="this_tag_doesnt_exist", delete = T ))})
+          {expect_warning(inventory( tag="this_tag_doesnt_exist", delete = T ))})
 test_that("deprecated inventory call still works (Test with extra arg)",
-          {expect_warning(freezr::inventory( tag="my_dummy_output_2", filename=f1, extra = paste( "This file is just some dummy output",
+          {expect_warning(inventory( tag="my_dummy_output_2", filename=f1, extra = paste( "This file is just some dummy output",
                                                                         "but if it were from one of my scientific projects",
                                                                         "I would ideally write about its origin, the processing it ",
                                                                         "has undergone, and its purpose." ) ) )})
@@ -45,14 +45,14 @@ assertthat::are_equal(f1_abs, inventory( tag = "my_dummy_output_3" ))
 # # New functions # #
 test_that( "inventory_show errs when inv absent but works and warns with make_new", {
   clean_up_inv()
-  expect_error(freezr::inventory_show(inv_location = dirname( f1_abs )))
-  expect_warning( freezr::inventory_show(make_new = TRUE, inv_location = dirname( f1_abs ) ) )
+  expect_error(inventory_show(inv_location = dirname( f1_abs )))
+  expect_warning( inventory_show(make_new = TRUE, inv_location = dirname( f1_abs ) ) )
   clean_up_inv()
 } )
 
 test_that( "make works", {
   clean_up_inv()
-  expect_error(freezr::inventory_make())
+  expect_error(inventory_make())
   inventory_make( results_path )
   clean_up_inv()
 })
@@ -62,7 +62,7 @@ test_that( "find works", {
   inventory_make( results_path )
   assertthat::assert_that(inventory_find(f1_abs, return_existence_logical = T))
   assertthat::assert_that(inventory_find(dirname(f1_abs), return_existence_logical = T))
-  freezr::inventory_find( )
+  inventory_find( )
   clean_up_inv()
   assertthat::assert_that(!inventory_find(f1_abs, return_existence_logical = T))
   assertthat::assert_that(!inventory_find(dirname(f1_abs), return_existence_logical = T))
@@ -72,17 +72,17 @@ test_that( "find works", {
 test_that( "add works after make", {
   clean_up_inv()
   inventory_make( results_path )
-  freezr::inventory_find( )
-  freezr::inventory_add( tag="my_dummy_dupe_tag", filename=f1 )
-  expect_warning( freezr::inventory_add( tag="my_dummy_dupe_tag", filename=f1 ) )
+  inventory_find( )
+  inventory_add( tag="my_dummy_dupe_tag", filename=f1 )
+  expect_warning( inventory_add( tag="my_dummy_dupe_tag", filename=f1 ) )
   clean_up_inv()
 })
 
 test_that( "add works with extra args", {
   clean_up_inv()
   inventory_make( results_path )
-  freezr::inventory_add( tag="my_dummy_output_2", filename = f1, parent_tag = "my_dummy_output_2" )
-  freezr::inventory_add( tag="my_dummy_output_3", filename=f1, extra = paste( "This file is just some dummy output",
+  inventory_add( tag="my_dummy_output_2", filename = f1, parent_tag = "my_dummy_output_2" )
+  inventory_add( tag="my_dummy_output_3", filename=f1, extra = paste( "This file is just some dummy output",
                                                                               "but if it were from one of my scientific projects",
                                                                               "I would ideally write about its origin, the processing it ",
                                                                               "has undergone, and its purpose." ) )
@@ -92,23 +92,23 @@ test_that( "add works with extra args", {
 test_that( "get works with incorrect arg", {
   clean_up_inv()
   inventory_make( results_path )
-  expect_warning(freezr::inventory_get( tag="this_tag_doesnt_exist" ))
+  expect_warning(inventory_get( tag="this_tag_doesnt_exist" ))
   clean_up_inv()
 })
 
 test_that( "get works with correct args", {
   clean_up_inv()
   inventory_make( results_path )
-  freezr::inventory_add( tag="my_dummy_output_2", filename = f1, parent_tag = "my_dummy_output_2" )
-  assertthat::are_equal(f1_abs, freezr::inventory_get( tag = "my_dummy_output_2" ))
+  inventory_add( tag="my_dummy_output_2", filename = f1, parent_tag = "my_dummy_output_2" )
+  assertthat::are_equal(f1_abs, inventory_get( tag = "my_dummy_output_2" ))
   clean_up_inv()
 })
 
 test_that( "add/get interface properly with absolute filepaths", {
   clean_up_inv()
   inventory_make( results_path )
-  freezr::inventory_add( tag="my_absolute_input", filename = f1_abs )
-  expect_equal(f1_abs, freezr::inventory_get( tag = "my_absolute_input" ))
+  inventory_add( tag="my_absolute_input", filename = f1_abs )
+  expect_equal(f1_abs, inventory_get( tag = "my_absolute_input" ))
   clean_up_inv()
 })
 clean_up_inv()

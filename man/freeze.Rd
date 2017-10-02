@@ -52,7 +52,8 @@ returns \code{destination} arg.
 Run an analysis while freezing a copy of the code (and perhaps dependencies) for later perusal.
 }
 \examples{
-setwd( file.path( "~", "my_project" ) )
-freeze(analyses_to_run = c( "my_functions.Rmd", "my_script.R" ),
-       destination = file.path("~", "my_project", "results") )
+
+#setwd( file.path( "~", "my_freezr_example_project", "scripts" ), )
+#freeze( analyses_to_run = c( "my_functions.Rmd", "my_script.R" ),
+#        destination = file.path("~", "my_freezr_example_project", "results") )
 }

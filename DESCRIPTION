@@ -1,11 +1,19 @@
 Package: freezr
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Easily Archive Quickly Changing Custom R Scripts For Reproducible Analysis
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Author: Eric Kernfeld
+Maintainer: Eric Kernfeld <eric.kern13@gmail.com>
+Description: If you are a data analyst in a scientific or scholarly field, then you've likely 
+    experienced the tension between reproducibility demands and fast-changing custom analysis scripts. 
+    `freezr` is an `R` package meant to alleviate this tension. It helps you archive your current 
+    analysis in a snap so you can move on to the next question or approach. In a single line of code, 
+    it will run your script, gather the output into a time-stamped results folder, save a copy of your 
+    code and `sessionInfo()`** along with the results, and nag you to write down some notes** about what
+    you did. For bigger projects, `freezr` includes a simple "inventory" system to keep track of saved
+    data. This allows you to load data into a downstream script without hard-coding paths, which is 
+    particularly useful when saving intermediates inside of timestamped `freezr` archives.
+License: MIT 
 LazyData: TRUE
 Suggests:
     testthat,
