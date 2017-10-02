@@ -29,6 +29,9 @@
 #' @param chastise If \code{TRUE} (default), creates a \code{notes.txt} file for you and nags
 #' you about filling it.
 #' @param notes_file Name of file to be created while \code{chastise}ing.
+#' @param other_repos_to_track If you want to record what commit some outside repo is on -- for 
+#' example, a package that you are developing separate from your data analysis repo -- put
+#' the path here. You can put more than one.
 #' @return returns \code{destination} arg.
 #' @examples
 #' 
@@ -45,7 +48,8 @@ freeze = function( analyses_to_run,
                    copy_deps_kb_limit = 100,
                    purl_aggressively = TRUE,
                    chastise = TRUE,
-                   notes_file = "notes.md" ){
+                   notes_file = "notes.md", 
+                   other_repos_to_track = NULL ){
 
   # # Nag user about leaving themselves notes.
   notes_file = file.path( destination, "notes.md" )
@@ -137,9 +141,27 @@ freeze = function( analyses_to_run,
     deps = NULL
   }
 
-  # # Save info on e.g. package versions.
-  session_info = file.path( destination, "logs", "sessionInfo.txt" )
-  cat( x = paste0( utils::capture.output( utils::sessionInfo() ), collapse = "\n"), file = session_info)
+  # # Save info on package versions and save hashes of relevant repos.
+  logfile_session = file.path( destination, "logs", "sessionInfo.txt" )
+  cat( x = paste0( utils::capture.output( utils::sessionInfo() ), collapse = "\n"), file = logfile_session)
+  
+  logfile_commit = file.path( destination, "logs", "commit_sha1_info.txt" )
+  repo_hashes = data.frame( path_to_repo = paste0(getwd(),other_repos_to_track) )
+  get_hash = function(path_to_repo){
+    tryCatch({
+      system(paste0("git -C ", path_to_repo, " rev-parse HEAD"), intern = TRUE)
+    }, 
+    error = function(e){
+      warning(paste0("Error when trying to obtain hash of repo at ", path_to_repo, "\n"))
+      return(e)
+    }, 
+    warning = function(w){
+      warning(paste0("Warning when trying to obtain hash of repo at ", path_to_repo, "\n"))
+      return(w)
+    } )
+  }
+  repo_hashes$hash =  sapply(repo_hashes$path_to_repo, get_hash)
+  write.table( x = repo_hashes, file = logfile_commit, row.names = F, quote = F, sep = "\t")
 
   # # Make log files, both human and machine readable
   freeze_call = list( analyses_to_run = analyses_to_run,
@@ -152,7 +174,8 @@ freeze = function( analyses_to_run,
                       copy_deps_kb_limit = copy_deps_kb_limit,
                       purl_aggressively = purl_aggressively,
                       chastise = chastise,
-                      notes_file = notes_file )
+                      notes_file = notes_file, 
+                      other_repos_to_track = other_repos_to_track )
   logfile = file.path( destination, "logs", "freeze_call.txt" )
   saveRDS( freeze_call, file.path( destination, "logs", "freeze_call_RDS.data" ) )
   utils::write.table( getwd(), file.path( destination, "logs", "freeze_call_wd.txt" ),

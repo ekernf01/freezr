@@ -1,3 +1,9 @@
+# Clean up from last time
+delete_me = list.files( file.path(getwd(), "results"), full.names = T )
+delete_me = delete_me[ !grepl(x = delete_me, pattern = "*inventory_guinea_pig*") ]
+cat("These files will be cleaned up from past tests:\n", paste0(delete_me, collapse = "\n"), "\n\n")
+unlink( delete_me, recursive = TRUE )
+
 # Basic test
 test_dest = freezr::freeze( analyses_to_run = c( "functions_to_freeze.Rmd", "script_to_freeze.R" ),
                             destination = file.path(getwd(), "results") )

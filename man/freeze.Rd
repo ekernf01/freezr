@@ -42,8 +42,6 @@ corresponding R files may be overwritten.}
 you about filling it.}
 
 \item{notes_file}{Name of file to be created while \code{chastise}ing.}
-
-\item{capture_output}{If \code{"text"}, catures the console output.}
 }
 \value{
 returns \code{destination} arg.

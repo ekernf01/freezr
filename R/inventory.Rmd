@@ -5,6 +5,7 @@
 #' Keep track of important items from previous analyses.
 #'
 #' @export
+#'
 #' @param inv_location Path to the inventory you want to create or modify. If possible, this arg
 #'  defaults to the parent of the last destination given to `freeze`.
 #' @param tag identifier for an inventory record that you want to add.
