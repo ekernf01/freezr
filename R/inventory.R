@@ -3,6 +3,7 @@
 #' Keep track of important items from previous analyses.
 #'
 #' @export
+#'
 #' @param inv_location Path to the inventory you want to create or modify. If possible, this arg
 #'  defaults to the parent of the last destination given to `freeze`.
 #' @param tag identifier for an inventory record that you want to add.
@@ -326,21 +327,55 @@ inventory_check = function( inv_location = NULL ){
 #' @param target_location The stuff gets put in <target_location>/inventory. 
 #' To avoid copying ridiculous long file paths, files are renamed as "tag.ext" so that 
 #' the new filename is the tag but the old extension (anything after the last period) is preserved. 
+#' For folders or for files with no '.' in the name, only the tag is used.
 #' @param overwrite Passed to file.copy and also checked before (over)writing the new .inventory file.
+#' @param verbose Print paths as files get copied?
 #'
 #' @export
 #'
-inventory_transfer = function( inv_location = NULL, target_location, overwrite = F ){
+inventory_transfer = function( inv_location = NULL, target_location, overwrite = F, verbose = F ){
   inventory_check(inv_location)
   new_inv_location = file.path(target_location, "inventory")
+  suppressWarnings( dir.create( new_inv_location, recursive = T ) ) 
   old_inv = new_inv = inventory_show( inv_location )
-  extension = gsub(x = old_inv$filename, pattern = "^.*\\.", replacement = "")
-  new_inv$filename = paste0(old_inv$tag, extension, sep = ".")
-  new_inv$filename = file.path( new_inv_location, new_inv$filename )
+  extension = ifelse( grepl( pattern = "\\.", x = old_inv$filename ),
+                      gsub(x = old_inv$filename, pattern = "^.*\\.", replacement = ""), 
+                      "" )
+  new_inv$filename = ifelse( nchar(extension) > 0, 
+                             paste(old_inv$tag, extension, sep = "."), 
+                             old_inv$tag )
+  full_path_temp  = file.path( new_inv_location, basename(old_inv$filename) )
+  full_path_final = file.path( new_inv_location, new_inv$filename )
+  
+  if(verbose){
+    cat("Copying:\n")
+  }
   for( i in seq_along( new_inv$tag )){
-    it_worked = file.copy(from = old_inv$filename[i], to = new_inv$filename[i], overwrite = overwrite, copy.mode = T )
-    if( !it_worked ){
-      warning( "file.copy returned FALSE.")
+    if(verbose){
+      cat("  ", old_inv$filename[i], "\n   to   \n", full_path_temp[i], "\n\n" )
+    }
+    transfer_worked = file.copy(from = old_inv$filename[i], 
+                          to = new_inv_location, 
+                          overwrite = overwrite, copy.mode = T, recursive = T )
+    if(verbose){
+      cat("  ", full_path_temp[i], "\n   to   \n", full_path_final[i], "\n\n" )
+    }
+    rename_worked = file.rename(from = full_path_temp[i], 
+                            to = full_path_final[i], )
+    
+    
+    if( !transfer_worked ){
+      warning( paste0("file.copy returned FALSE on", 
+                      " tag = ", old_inv$tag[i], 
+                      " file = ", old_inv$filename[i], 
+                      "\n") )
+    }
+    if( !rename_worked ){
+      warning( paste0("file.rename returned FALSE on", 
+                      " tag = ", old_inv$tag[i], 
+                      " file = ", old_inv$filename[i], 
+                      " . freezr may not have permission to overwrite.",
+                      "\n") )
     }
   }
   new_inv_path = file.path(new_inv_location, ".inventory")
