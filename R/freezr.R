@@ -26,7 +26,7 @@
 #' @param chastise If \code{TRUE} (default), creates a \code{notes.txt} file for you and nags
 #' you about filling it.
 #' @param notes_file Name of file to be created while \code{chastise}ing.
-#' @param other_repos_to_track If you want to record what commit some outside repo is on -- for 
+#' @param repos_to_track If you want to record what commit some outside repo is on -- for 
 #' example, a package that you are developing separate from your data analysis repo -- put
 #' the path here. You can put more than one.
 #' @return returns \code{destination} arg.
@@ -46,8 +46,7 @@ freeze = function( analyses_to_run,
                    purl_aggressively = TRUE,
                    chastise = TRUE,
                    notes_file = "notes.md", 
-                   other_repos_to_track = NULL ){
-
+                   repos_to_track = NULL ){
   # # Nag user about leaving themselves notes.
   notes_file = file.path( destination, "notes.md" )
   if( chastise ){
@@ -83,34 +82,42 @@ freeze = function( analyses_to_run,
   cat( paste0( "Saving analysis tools to `", destination, "`.\n" ) )
 
   # # run analyses and freeze them, capturing graphics and text.
-  dir.create( file.path( destination, "output" ) )
+  dir.create( file.path( destination, "output" ), recursive = T )
   dir.create( file.path( destination, "code" ) )
   dir.create( file.path( destination, "logs" ) )
-  graphics_out = file.path( destination, "output", "graphics.pdf" )
-  grDevices::pdf( graphics_out )
+  outfile_graphics = file.path( destination, "output", "graphics.pdf" )
+  outfile_text     = file.path( destination, "output", "text.txt" )
+  file.create( outfile_text )
   {
-    outfile = file.path( destination, "output", "text.txt" )
-    file.create( outfile )
-    sink( file = outfile )
-    {
-      if( !is.null( seed_to_set ) ) { set.seed( seed_to_set ) }
-      for( analysis_i in analyses_to_run ){
-        frozen_analysis_i = file.path( destination, "code", analysis_i )
-        if( !dir.exists( dirname( frozen_analysis_i ) ) ){ dir.create( dirname( frozen_analysis_i ) )}
-        file.copy( from = analysis_i, to = frozen_analysis_i )
-        if( run_from_cryo_storage ){
-          old_wd = getwd()
-          setwd( destination )
-          try( expr = { run_r_or_rmd( frozen_analysis_i, destination ) } )
-          setwd( old_wd )
-        } else {
-          try( expr = { run_r_or_rmd( frozen_analysis_i, destination ) } )
-        }
+    grDevices::pdf( outfile_graphics )
+    sink( file = outfile_text )
+    if( !is.null( seed_to_set ) ) { set.seed( seed_to_set ) }
+    for( analysis_i in analyses_to_run ){
+      # Run script from appropriate wd
+      frozen_analysis_i = file.path( destination, "code", analysis_i )
+      if( !dir.exists( dirname( frozen_analysis_i ) ) ){ dir.create( dirname( frozen_analysis_i ) )}
+      file.copy( from = analysis_i, to = frozen_analysis_i )
+      if( run_from_cryo_storage ){
+        old_wd = getwd()
+        setwd( destination )
+        my_err = tryCatch( expr = { run_r_or_rmd( frozen_analysis_i, destination ) }, error = function(e) e )
+        setwd( old_wd )
+      } else {
+        my_err = tryCatch( expr = { run_r_or_rmd( frozen_analysis_i, destination ) }, error = function(e) e )
       }
+      # TODO: Send errors and tracebacks (traces back?) to logfile
+      # if( !is.null( my_err ) ){
+      #   logfile = file.path( destination, "logs", paste0( analysis_i, ".log" ) )
+      #   warning( paste0( "Error when running ", analysis_i, "; check ", logfile, " for error and traceback.\n " ) ) 
+      #   sink( logfile )
+      #   print(my_err)
+      #   print(traceback())
+      #   sink()
+      # }
     }
     sink_reset()
+    grDevices::dev.off()
   }
-  grDevices::dev.off()
 
   # # copy dependencies
   if( !is.null( dependencies) )
@@ -143,18 +150,21 @@ freeze = function( analyses_to_run,
   cat( x = paste0( utils::capture.output( utils::sessionInfo() ), collapse = "\n"), file = logfile_session)
   
   logfile_commit = file.path( destination, "logs", "commit_sha1_info.txt" )
-  repo_hashes = data.frame( path_to_repo = paste0(getwd(),other_repos_to_track) )
+  repo_hashes = data.frame( path_to_repo = paste0( repos_to_track ),
+                            stringsAsFactors = FALSE ) #goddamn factors fuck up everything
   get_hash = function(path_to_repo){
+    gsub( ".git", "", path_to_repo )
     tryCatch({
-      system(paste0("git -C ", path_to_repo, " rev-parse HEAD"), intern = TRUE)
+      hash = system2("git", args = c( " -C ", path_to_repo, " rev-parse HEAD"), stdout = TRUE )
+      return( hash )
     }, 
     error = function(e){
-      warning(paste0("Error when trying to obtain hash of repo at ", path_to_repo, "\n"))
-      return(e)
+      warning( paste0( "Error when trying to obtain hash of repo at ", path_to_repo, ":\n", gettext( e ) ) )
+      return( "" )
     }, 
     warning = function(w){
-      warning(paste0("Warning when trying to obtain hash of repo at ", path_to_repo, "\n"))
-      return(w)
+      warning( paste0( "Warning when trying to obtain hash of repo at ", path_to_repo, ":\n", gettext( w ) ) )
+      return( "" )
     } )
   }
   repo_hashes$hash =  sapply(repo_hashes$path_to_repo, get_hash)
@@ -172,7 +182,7 @@ freeze = function( analyses_to_run,
                       purl_aggressively = purl_aggressively,
                       chastise = chastise,
                       notes_file = notes_file, 
-                      other_repos_to_track = other_repos_to_track )
+                      repos_to_track = repos_to_track )
   logfile = file.path( destination, "logs", "freeze_call.txt" )
   saveRDS( freeze_call, file.path( destination, "logs", "freeze_call_RDS.data" ) )
   utils::write.table( getwd(), file.path( destination, "logs", "freeze_call_wd.txt" ),

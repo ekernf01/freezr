@@ -5,8 +5,8 @@ cat("These files will be cleaned up from past tests:\n", paste0(delete_me, colla
 unlink( delete_me, recursive = TRUE )
 
 # Basic test
-test_dest = freezr::freeze( analyses_to_run = c( "functions_to_freeze.Rmd", "script_to_freeze.R" ),
-                            destination = file.path(getwd(), "results") )
+test_dest = freeze( analyses_to_run = c( "functions_to_freeze.Rmd", "script_to_freeze.R" ),
+                    destination = file.path(getwd(), "results") )
 
 # Test with a script that throws an error
 Sys.sleep(2) #time stamps have a 1-second resolution, so need this to avoid collisions.
@@ -27,6 +27,13 @@ freezr::freeze( analyses_to_run = c( "functions_to_freeze.Rmd", "script_to_freez
                 destination = file.path(getwd(), "results"),
                 dependencies = "dependency.txt")
 
+Sys.sleep(2)
+test_that("Tracking of a nonexistent git repo yields a warning.", {
+  expect_warning(
+    freezr::freeze( analyses_to_run = c( "functions_to_freeze.Rmd", "script_to_freeze.R" ),
+                    destination = file.path(getwd(), "results"), other_repos_to_track = "~")
+  )
+})
 
 
 

@@ -354,14 +354,14 @@ inventory_transfer = function( inv_location = NULL, target_location, overwrite =
     if(verbose){
       cat("  ", old_inv$filename[i], "\n   to   \n", full_path_temp[i], "\n\n" )
     }
-    transfer_worked = file.copy(from = old_inv$filename[i], 
-                          to = new_inv_location, 
-                          overwrite = overwrite, copy.mode = T, recursive = T )
+    # Use inventory_get just to compute the absolute path.
+    transfer_worked = file.copy( from = inventory_get( old_inv$tag[i] ), 
+                                 to = new_inv_location, 
+                                 overwrite = overwrite, copy.mode = T, recursive = T )
     if(verbose){
       cat("  ", full_path_temp[i], "\n   to   \n", full_path_final[i], "\n\n" )
     }
-    rename_worked = file.rename(from = full_path_temp[i], 
-                            to = full_path_final[i], )
+    rename_worked = file.rename(from = full_path_temp[i], to = full_path_final[i] )
     
     
     if( !transfer_worked ){

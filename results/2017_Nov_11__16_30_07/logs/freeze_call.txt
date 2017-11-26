@@ -1,0 +1,12 @@
+analyses_to_run	functions_to_freeze.Rmd	script_to_freeze.R
+destination	/Users/erickernfeld/Desktop/software_projects/freezr/results/2017_Nov_11__16_30_07	
+run_from_cryo_storage	FALSE	
+dependencies		
+seed_to_set		
+timestamp_as_folder	TRUE	
+force	FALSE	
+copy_deps_kb_limit	100	
+purl_aggressively	TRUE	
+chastise	TRUE	
+notes_file	/Users/erickernfeld/Desktop/software_projects/freezr/results/notes.md	
+other_repos_to_track		

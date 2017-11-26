@@ -7,7 +7,7 @@
 freeze(analyses_to_run, destination, run_from_cryo_storage = FALSE,
   dependencies = NULL, seed_to_set = NULL, timestamp_as_folder = TRUE,
   force = FALSE, copy_deps_kb_limit = 100, purl_aggressively = TRUE,
-  chastise = TRUE, notes_file = "notes.md", other_repos_to_track = NULL)
+  chastise = TRUE, notes_file = "notes.md", repos_to_track = NULL)
 }
 \arguments{
 \item{analyses_to_run}{R or R markdown files to be run and frozen.}
@@ -43,7 +43,7 @@ you about filling it.}
 
 \item{notes_file}{Name of file to be created while \code{chastise}ing.}
 
-\item{other_repos_to_track}{If you want to record what commit some outside repo is on -- for 
+\item{repos_to_track}{If you want to record what commit some outside repo is on -- for 
 example, a package that you are developing separate from your data analysis repo -- put
 the path here. You can put more than one.}
 }

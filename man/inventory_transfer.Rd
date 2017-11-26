@@ -4,16 +4,20 @@
 \alias{inventory_transfer}
 \title{Copy all files listed in the inventory to the specified target location.}
 \usage{
-inventory_transfer(inv_location = NULL, target_location, overwrite = F)
+inventory_transfer(inv_location = NULL, target_location, overwrite = F,
+  verbose = F)
 }
 \arguments{
 \item{inv_location}{Where to look for the inventory.}
 
 \item{target_location}{The stuff gets put in <target_location>/inventory. 
 To avoid copying ridiculous long file paths, files are renamed as "tag.ext" so that 
-the new filename is the tag but the old extension (anything after the last period) is preserved.}
+the new filename is the tag but the old extension (anything after the last period) is preserved. 
+For folders or for files with no '.' in the name, only the tag is used.}
 
 \item{overwrite}{Passed to file.copy and also checked before (over)writing the new .inventory file.}
+
+\item{verbose}{Print paths as files get copied?}
 }
 \description{
 Copy all files listed in the inventory to the specified target location.

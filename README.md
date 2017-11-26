@@ -40,6 +40,8 @@ Then you can start freezing code immediately. The following line will run `my_fu
 
 #### Other reproducibility tools
 
+*I recently found out about [`recordr`](https://github.com/NCEAS/recordr), which is very similar to `freezr`. I haven't tried `recordr` yet, but I know it is quite sophisticated and has some great interactive features. As far as I can see, the only functionality unique to `freezr` is the "inventory" system, which helps pass data between scripts. The inventory is very handy for the single cell RNA-seq projects that I work on.*  
+
 Here are some other tools relating to reproducible research in R. These solve problems that overlap with the domain of `freezr`, but none has the same purpose or functionality.
 
 - To deal with statistical issues such as the ["Garden of forking paths"](http://www.stat.columbia.edu/~gelman/research/unpublished/p_hacking.pdf), there's [`revisit`](https://github.com/matloff/revisit). 

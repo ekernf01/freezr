@@ -28,7 +28,7 @@ run_r_or_rmd = function( file_name, destination, purl_aggressively ) {
   } else {
     stop("Can only handle `.R` and `.Rmd` files.")
   }
-  return( name_dot_R )
+  return()
 }
 
 #' Turn a ragged list of atomic vectors to a rectangle by adding filler.

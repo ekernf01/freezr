@@ -5,6 +5,8 @@ library(testthat)
 
 # Files to use as guinea pigs
 f1 = f1_rel = file.path( "inventory_guinea_pig", "user", "custom_user_output.txt" )
+file_no_ext_rel = file.path( "inventory_guinea_pig", "user", "custom_user_output.txt" )
+folder_rel      = file.path( "inventory_guinea_pig", "user", "file_without_extension" )
 results_path = file.path("", "Users", "erickernfeld", "Desktop",
                          "software_projects", "freezr",
                          "tests", "testthat", "results")
@@ -111,4 +113,19 @@ test_that( "add/get interface properly with absolute filepaths", {
   expect_equal(f1_abs, inventory_get( tag = "my_absolute_input" ))
   clean_up_inv()
 })
+
+test_that( "_transfer works for folders and for files with and without extensions.", {
+  transferred_inv_path = file.path( dirname( results_path ), "transferred_inv" )
+  clean_up_inv()
+  inventory_make( results_path )
+  inventory_add( tag="f1_rel", filename = f1_rel )
+  inventory_add( tag="file_no_ext", filename = file_no_ext_rel )
+  inventory_add( tag="folder", filename = folder_rel )
+  unlink(transferred_inv_path, recursive = T)
+  inventory_transfer( target_location = transferred_inv_path, overwrite = F )
+  expect_warning( inventory_transfer( target_location = transferred_inv_path, overwrite = T ),
+                  regexp = "*inventory already exists*")
+  clean_up_inv()
+})
 clean_up_inv()
+

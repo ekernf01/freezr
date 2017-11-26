@@ -1,0 +1,13 @@
+tag	parent_tag	date_modified	filename	extra
+my_dummy_output	NA	2017_Nov_12|07_44_08	my_dummy_output.txt	NA
+my_dummy_output_3	my_dummy_output_2	2017_Nov_12|07_44_08	my_dummy_output_3.txt	NA
+my_dummy_output_2		2017_Nov_12|07_44_08	my_dummy_output_2.txt	This file is just some dummy output but if it were from one of my scientific projects I would ideally write about its origin, the processing it  has undergone, and its purpose.
+my_dummy_dupe_tag		2017_Nov_12|07_44_08	my_dummy_dupe_tag.txt	
+my_dummy_dupe_tag.1		2017_Nov_12|07_44_08	my_dummy_dupe_tag.1.txt	
+my_dummy_output_2.1	my_dummy_output_2	2017_Nov_12|07_44_08	my_dummy_output_2.1.txt	
+my_dummy_output_3.1		2017_Nov_12|07_44_08	my_dummy_output_3.1.txt	This file is just some dummy output but if it were from one of my scientific projects I would ideally write about its origin, the processing it  has undergone, and its purpose.
+my_dummy_output_2.2	my_dummy_output_2	2017_Nov_12|07_44_08	my_dummy_output_2.2.txt	
+my_absolute_input		2017_Nov_12|07_44_08	my_absolute_input.txt	
+f1_rel		2017_Nov_12|07_44_08	f1_rel.txt	
+file_no_ext		2017_Nov_12|07_44_08	file_no_ext.txt	
+folder		2017_Nov_12|07_44_08	folder	
