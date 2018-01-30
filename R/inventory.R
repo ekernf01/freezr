@@ -104,7 +104,7 @@ inventory_rm = function( tag = NULL, inv_location = NULL ){
 
   inventory_path = inventory_find( inv_location )
   inv_location = dirname( inventory_path )
-  inv = inventory_show( inv_location, make_new = T )
+  inv = inventory_show( inv_location, make_new = F )
 
   given_tag = tag
   if( ! given_tag %in% inv$tag ){
@@ -328,14 +328,14 @@ inventory_check = function( inv_location = NULL ){
 #' To avoid copying ridiculous long file paths, files are renamed as "tag.ext" so that 
 #' the new filename is the tag but the old extension (anything after the last period) is preserved. 
 #' For folders or for files with no '.' in the name, only the tag is used.
-#' @param overwrite Passed to file.copy and also checked before (over)writing the new .inventory file.
+#' @param overwrite Passed to file.copy and also checked before (over)writing the new .inventory.txt file.
 #' @param verbose Print paths as files get copied?
 #'
 #' @export
 #'
 inventory_transfer = function( inv_location = NULL, target_location, overwrite = F, verbose = F ){
   inventory_check(inv_location)
-  new_inv_location = file.path(target_location, "inventory")
+  new_inv_location = file.path(target_location, "transferred_files")
   suppressWarnings( dir.create( new_inv_location, recursive = T ) ) 
   old_inv = new_inv = inventory_show( inv_location )
   extension = ifelse( grepl( pattern = "\\.", x = old_inv$filename ),
@@ -355,7 +355,7 @@ inventory_transfer = function( inv_location = NULL, target_location, overwrite =
       cat("  ", old_inv$filename[i], "\n   to   \n", full_path_temp[i], "\n\n" )
     }
     # Use inventory_get just to compute the absolute path.
-    transfer_worked = file.copy( from = inventory_get( old_inv$tag[i] ), 
+    transfer_worked = file.copy( from = inventory_get( old_inv$tag[i], inv_location = inv_location ), 
                                  to = new_inv_location, 
                                  overwrite = overwrite, copy.mode = T, recursive = T )
     if(verbose){
@@ -378,7 +378,7 @@ inventory_transfer = function( inv_location = NULL, target_location, overwrite =
                       "\n") )
     }
   }
-  new_inv_path = file.path(new_inv_location, ".inventory")
+  new_inv_path = file.path(new_inv_location, ".inventory.txt")
   if(file.exists(new_inv_path)){
     my_msg = paste0(new_inv_path, " already exists.\n")
     if( overwrite ){

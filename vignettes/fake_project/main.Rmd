@@ -1,0 +1,44 @@
+---
+title: "Main file for freeze sample project"
+author: "Eric Kernfeld"
+date: "November 26, 2017"
+output: html_document
+---
+
+This document demonstrates how you can use `freezr` within the layout of a typical data-analysis project.
+
+```{r setup, include=FALSE}
+
+
+setwd("path/to/my/project")
+
+# # Load freezr and make a shortcut to cut down on boilerplate
+library(freezr)
+
+#' When run without args, this function runs only setup.Rmd, and it saves to the "interactive_results" folder.
+#' Otherwise, it runs both setup.Rmd and an analysis script, and it 
+#' names the results subfolder after the source code subfolder. This way, the same
+#' organizational structure is used for the analysis scripts and the results folders.
+#' 
+flash_freeze = function( analysis_to_run = NULL, results_subdir = NULL ){
+  if(is.null(results_subdir)){
+     if(is.null(analysis_to_run)){
+      results_subdir = "interactive_results"
+    } else {
+      results_subdir = "results"
+    }
+  }
+  freezr::freeze( analyses_to_run = file.path( "scripts", c( "setup.Rmd", analysis_to_run )),
+                  destination = file.path( getwd(), results_subdir ),
+                  chastise = F, seed_to_set = 00000000, 
+                  repos_to_track = c("path/to/my/project", "~/path/to/related/coevolving/toolbox") )
+}
+```
+
+
+```{r}
+# This call runs your setup function, after which you can play around with the code.
+flash_freeze()
+# Clean run goes here.
+flash_freeze( "qc_all.Rmd" )
+```

@@ -124,7 +124,7 @@ test_that( "_transfer works for folders and for files with and without extension
   unlink(transferred_inv_path, recursive = T)
   inventory_transfer( target_location = transferred_inv_path, overwrite = F )
   expect_warning( inventory_transfer( target_location = transferred_inv_path, overwrite = T ),
-                  regexp = "*inventory already exists*")
+                  regexp = "*already exists*")
   clean_up_inv()
 })
 clean_up_inv()

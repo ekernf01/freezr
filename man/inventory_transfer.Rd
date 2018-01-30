@@ -15,7 +15,7 @@ To avoid copying ridiculous long file paths, files are renamed as "tag.ext" so t
 the new filename is the tag but the old extension (anything after the last period) is preserved. 
 For folders or for files with no '.' in the name, only the tag is used.}
 
-\item{overwrite}{Passed to file.copy and also checked before (over)writing the new .inventory file.}
+\item{overwrite}{Passed to file.copy and also checked before (over)writing the new .inventory.txt file.}
 
 \item{verbose}{Print paths as files get copied?}
 }

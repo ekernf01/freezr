@@ -10,19 +10,19 @@ vignette: >
 ---
 
 
-###What problem does `freezr` solve?
+### `freezr` automates irritating aspects of data analysis project organization
 
-Data analysis projects require moderately complex organization 
-(
-[example 1](https://www.maxmasnick.com/analysis-org/), 
-[example 2](https://r-dir.com/blog/2013/11/folder-structure-for-data-analysis.html), 
-[example 3](https://medium.com/human-in-a-machine-world/folder-structure-for-data-analysis-62a84949a6ce#.tj5h1u2wp)
-), which can be daunting, especially for newcomers to the field.
-To make a project reproducible, the data analyst incurs even more overhead. Every time 
+Data analysis projects require moderately complex organization, which can be daunting, especially for newcomers to the field. To make a project reproducible, the data analyst incurs even more overhead. Every time 
 a result merits recording, their future self (or a colleague taking over) will need 
 more than just the current graphical or text output. They'll need, at a minimum, working code and 
 notes about the analysis. Better still would be to save package versions and other 
 inputs or dependencies. 
+
+(examples of daunting project organization:  
+[example 1](https://www.maxmasnick.com/analysis-org/), 
+[example 2](https://r-dir.com/blog/2013/11/folder-structure-for-data-analysis.html), 
+[example 3](https://medium.com/human-in-a-machine-world/folder-structure-for-data-analysis-62a84949a6ce#.tj5h1u2wp)
+)
 
 Fortunately, much of this extra work can be automated. 
 
@@ -32,15 +32,15 @@ First, some preliminaries: this will create some fake code that you can pretend 
 
 ```{r, warning=F}
 fake_proj = file.path( getwd(), "fake_project" )
-dir.create(fake_proj); setwd(fake_proj)
+dir.create(fake_proj)
+dir.create(file.path( fake_proj, "results" ))
 cat("my_fun = function(x) plot(x)", file = file.path( fake_proj, "my_functions.R" ) )
 cat("my_fun(1:5);print('blah')", file = file.path( fake_proj, "my_script.R" ) )
-dir.create(file.path( fake_proj, "results" ))
 ```
 
 Now let's freeze it.
 
-```{r, warning=F}
+```{r, warning=F, root.dir = fake_proj}
 library(freezr)
 freeze( analyses_to_run = c( "my_functions.R", "my_script.R" ),
         destination = file.path( fake_proj, "results" ) )
@@ -55,54 +55,63 @@ In this line of code, `freeze` has:
 
 Now you can go add notes to the file it created, and then you're free to keep iterating on your analysis.
 
-###Inventory
+### inventory_ functions help track results and move them downstream
 
-The problem with `freeze` is that your results folder ends up having both "spaghetti" issues (time-stamped folders everywhere with small variations on the same analysis and unclear relationships) and "lasagna" issues (results buried two or three folders deeper than where you would save them by hand.) The `inventory` helps manage this big ol' scrap-heap. It lets you pick out important results, assigning them short, easy `tag`s. Later on, you can retrieve the path to a key file or folder by referring to its `tag`.
+The problem with `freeze` is that your results folder ends up having both "spaghetti" issues (time-stamped folders everywhere with small variations on the same analysis and unclear relationships) and "lasagna" issues (results buried two or three folders deeper than where you would save them by hand). The `inventory_` functions help manage this big ol' scrap-heap. They let you highlight important results, assigning them short `tag`s. Later on, you can retrieve the path to a key file or folder by referring to its `tag`.
 
-I reccomend one or two `inventory` calls per `freeze` call. More is fine, I guess, but zero inventory calls is only appropriate if nothing will ever happen downstream of that frozen analysis.
+Note that the inventory is basically a list that helps keep track of files. It does not contain any files -- they stay wherever you put them originally. The only `inventory_`-family function that actually touches files is `inventory_transfer`, which copies them. Every other `inventory_` function only manipulates a list that keeps track of their locations.
+
+I recommend one or two `inventory_add` calls per `freeze` call. Zero inventory calls is appropriate if nothing will ever happen downstream of that frozen analysis.
 
 Let's move into another demo folder.
 
 ```{r, warning=F}
-dir.create(path = "inventory_demo")
-setwd("inventory_demo")
+inv_demo_path = file.path(fake_proj, "inventory_demo")
+dir.create(path = inv_demo_path)
 ```
 
 Imagine you have a bunch of crap built up, including the alphabet.
+
 ```{r, warning=F}
 ugly_folders = paste0( "long_ugly_results_folder_2017JAN11", 1:2)
+ugly_folders = file.path( inv_demo_path, ugly_folders )
 lapply( ugly_folders, dir.create )
 write.table(letters, file.path(ugly_folders[1], "alphabet.txt"))
 ```
 
 You're about to add Spanish characters, and you wanted to easily retrieve the alphabet.
 So you put it in the inventory with an easy-to-remember tag and some notes to yourself.
+
 ```{r}
-inventory( inv_location = getwd(),
-           tag = "abc",
-           filename = file.path(ugly_folders[1], "alphabet.txt"),
-           extra = "Honestly this is just the alphabet.")
-inventory( inv_location = getwd() )
+inventory_add( inv_location = inv_demo_path, 
+               tag = "abc",
+               force = T,
+               filename = file.path(ugly_folders[1], "alphabet.txt"),
+               extra = "This is just the alphabet.")
+inventory_show( inv_location = inv_demo_path )
 ```
 
 Then you fetch it from the inventory and save a new version somewhere else.
+
 ```{r}
-old_alpha_file = inventory( inv_location = getwd(),
-                            tag = "abc")
+old_alpha_file = inventory_get( inv_location = inv_demo_path,
+                                tag = "abc")
 old_alpha = read.table(old_alpha_file, stringsAsFactors = F)[[1]]
 write.table(sort(c(old_alpha, "rr", "ch", "ll", "ñ")), file.path(ugly_folders[2], "alphabet.txt"))
 ```
 
 You can add a new record with language awareness and delete the old one:
+
 ```{r}
-inventory( inv_location = getwd(),
-           tag = "abc_eng",
-           filename = file.path(ugly_folders[1], "alphabet.txt"),
-           extra = "This is the English alphabet.")
-inventory( inv_location = getwd(),
-           tag = "abc",
-           delete = T )
-inventory( inv_location = getwd() )
+inventory_add( inv_location = inv_demo_path,
+               tag = "abc_eng",
+               force = T,
+               filename = file.path(ugly_folders[1], "alphabet.txt"),
+               extra = "This is the English alphabet.")
+?inventory_rm
+inventory_rm( inv_location = inv_demo_path,
+              tag = "abc" )
+inventory_show( inv_location = inv_demo_path )
 ```
 
 Finally, you add a record for the Spanish alphabet.
@@ -111,17 +120,28 @@ the construction of the Spanish alphabet version
 depended on the English alphabet version.
 
 ```{r}
-inventory( inv_location = getwd(),
-           tag = "abc_esp",
-           parent_tag = "abc_eng",
-           filename = file.path(ugly_folders[2], "alphabet.txt"),
-           extra = "This is the Spanish alphabet.")
-inventory( inv_location = getwd() )
+inventory_add( inv_location = inv_demo_path,
+               tag = "abc_esp",
+               parent_tag = "abc_eng",
+               filename = file.path(ugly_folders[2], "alphabet.txt"),
+               force = T,
+               extra = "This is the Spanish alphabet.")
+inventory_show( inv_location = inv_demo_path )
 ```
 
-Move back out of the demo folder to finish up.
+You can check that your inventory points to files that actually exist.
 
 ```{r}
-setwd(dirname(getwd()))
+?inventory_check
+inventory_integrity_data = inventory_check(inv_location = inv_demo_path)
 ```
+
+You can also transfer the inventory to a new location.
+
+```{r}
+?inventory_transfer
+inventory_transfer(inv_location = inv_demo_path,
+                   target_location = file.path(inv_demo_path, "..", "newly_copied_inv"))
+```
+
 

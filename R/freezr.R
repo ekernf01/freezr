@@ -26,9 +26,9 @@
 #' @param chastise If \code{TRUE} (default), creates a \code{notes.txt} file for you and nags
 #' you about filling it.
 #' @param notes_file Name of file to be created while \code{chastise}ing.
-#' @param repos_to_track If you want to record what commit some outside repo is on -- for 
+#' @param repos_to_track For git users. If you want to record what commit some outside repo is on -- for 
 #' example, a package that you are developing separate from your data analysis repo -- put
-#' the path here. You can put more than one.
+#' the path here. You can put more than one. 
 #' @return returns \code{destination} arg.
 #' @examples
 #' 
@@ -51,7 +51,7 @@ freeze = function( analyses_to_run,
   notes_file = file.path( destination, "notes.md" )
   if( chastise ){
     if( !file.exists( notes_file ) ){
-      cat( paste( "I noticed there was no file called notes.txt in your destination folder.\n",
+      cat( paste( "\nI noticed there was no file called notes.txt in your destination folder.\n",
                   "I'll make one so you can leave your future self some notes.\n",
                   "If you want me to shut up about this, put `chastise=F`.\n") )
       file.create( file.path( destination, "notes.txt" ) )
@@ -193,6 +193,83 @@ freeze = function( analyses_to_run,
   return( invisible( destination ) )
 }
 
+#' Return a function "flash_freeze" that saves on project-specific boilerplate compared to "freeze". 
+#' 
+#' @param project_directory Where's your freezr project? Should contain subdirectories "results" and "scripts." Try "freezr::create_empty_project".
+#' @param setup_scripts Scripts to be run first every time you flash_freeze an analysis. Helps avoid copy-pasting code. For example, a setup script might load packages, utility functions, or reusable functions that you haven't yet packaged up.
+#' @param repos_to_track Helps track outside repos. See corresponding arg of `freeze`. 
+#'
+#' 
+#' @details When run without args, this "flash_freeze" runs the setup scripts and saves to the "interactive" folder. Your namespace retains objects created by the setup scripts, so you can experience what your analysis scripts are experiencing. 
+#' Otherwise, "flash_freeze" takes these args: 
+#' \itemize{
+#' \item "analyses_to_run" should be a character vector containing paths to R or .Rmd files in your "scripts" folder
+#' \item "results_subdir" should be a character vector to be added onto the "results" folder before
+#' It's optional, and if NULL (recommended), it names the results subfolder after the subfolder 
+#' of the first analysis script. This way, the organizational structure is mirrored between the
+#' analysis scripts and the results.
+#' \item ... extra args passed to "freeze"
+#' }
+#' @export
+#' 
+configure_flash_freeze = function( project_directory = getwd(), 
+                                   setup_scripts = NULL, 
+                                   repos_to_track = project_directory ){
+  cat("\n")
+  cat("Result will send output to: ",      project_directory, "\n")
+  cat("Will run setup scripts at each call: ", setup_scripts, "\n")
+  cat("Will track repos at: ", repos_to_track, "\n")
+  
+  if( any( grepl("scripts", setup_scripts) ) ) {
+    stop("setup_scripts paths should be relative to <my_project>/scripts/.")
+  }
+
+  flash_freeze = function( analyses_to_run = NULL, results_subdir = NULL, ... ){
+    if( any( grepl("scripts", analyses_to_run) ) ) {
+      stop("Input paths should be relative to <my_project>/scripts/.")
+    }
+    if ( any( grepl("results", results_subdir ) ) ) {
+      stop("results paths should be relative to <my_project>/results/.")
+    }
+    
+    # Set default results subdir to mirror script subdirectory
+    if(is.null(results_subdir)){
+      if(is.null(analyses_to_run)){
+        results_subdir = "interactive"
+      } else {
+        results_subdir = dirname(analyses_to_run[1]) 
+      }
+    }
+    
+    # Handle case when there is no subdir between "scripts/" and "analyses_to_run"
+    if(results_subdir=="." ){
+      dest = file.path( project_directory, "results")
+    } else {
+      dest = file.path( project_directory, "results", results_subdir)
+    }
+
+    
+    cat( "\nproject_directory: ", project_directory)
+    cat( "\nsetup_scripts: ",     setup_scripts)
+    cat( "\nanalyses_to_run:",    analyses_to_run )
+    cat( "\nresults_subdir:",     results_subdir )
+    cat( "\ndest:",     dest )
+
+    freezr::freeze( analyses_to_run = c( setup_scripts, analyses_to_run )  ,
+                    destination     = dest,
+                    repos_to_track = repos_to_track, ... )
+  }
+  return( flash_freeze )
+}
+
+#' Create a template project suitable for use with freezr. 
+#'
+#' @export
+#' 
+create_empty_project = function( directory ){
+  cat("Sorry, create_empty_project has not been implemented yet. Please nag eric about this.")
+}
+  
 
 ## ---- eval = F-----------------------------------------------------------
 ## #' Check frozen dependencies for changes.

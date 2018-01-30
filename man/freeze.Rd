@@ -43,7 +43,7 @@ you about filling it.}
 
 \item{notes_file}{Name of file to be created while \code{chastise}ing.}
 
-\item{repos_to_track}{If you want to record what commit some outside repo is on -- for 
+\item{repos_to_track}{For git users. If you want to record what commit some outside repo is on -- for 
 example, a package that you are developing separate from your data analysis repo -- put
 the path here. You can put more than one.}
 }
