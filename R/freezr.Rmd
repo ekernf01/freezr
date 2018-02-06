@@ -209,7 +209,7 @@ freeze = function( analyses_to_run,
 #' \item "analyses_to_run" should be a character vector containing paths to R or .Rmd files in your "scripts" folder
 #' \item "results_subdir" should be a character vector to be added onto the "results" folder before
 #' It's optional, and if NULL (recommended), it names the results subfolder after the subfolder 
-#' of the first analysis script. This way, the organizational structure is mirrored between the
+#' of the last analysis script. This way, the organizational structure is mirrored between the
 #' analysis scripts and the results.
 #' \item ... extra args passed to "freeze"
 #' }
@@ -219,9 +219,9 @@ configure_flash_freeze = function( project_directory = getwd(),
                                    setup_scripts = NULL, 
                                    repos_to_track = project_directory ){
   cat("\n")
-  cat("Result will send output to: ",      project_directory, "\n")
-  cat("Will run setup scripts at each call: ", setup_scripts, "\n")
-  cat("Will track repos at: ", repos_to_track, "\n")
+  cat("Will work from: ",      project_directory, "\n")
+  cat("Will run these setup scripts at each call: ", setup_scripts, "\n")
+  cat("Will track these repos: ", repos_to_track, "\n")
   
   if( any( grepl("scripts", setup_scripts) ) ) {
     stop("setup_scripts paths should be relative to <my_project>/scripts/.")
@@ -240,7 +240,7 @@ configure_flash_freeze = function( project_directory = getwd(),
       if(is.null(analyses_to_run)){
         results_subdir = "interactive"
       } else {
-        results_subdir = dirname(analyses_to_run[1]) 
+        results_subdir = dirname(rev(analyses_to_run)[1]) 
       }
     }
     
@@ -251,12 +251,13 @@ configure_flash_freeze = function( project_directory = getwd(),
       dest = file.path( project_directory, "results", results_subdir)
     }
 
-    
-    cat( "\nproject_directory: ", project_directory)
-    cat( "\nsetup_scripts: ",     setup_scripts)
-    cat( "\nanalyses_to_run:",    analyses_to_run )
-    cat( "\nresults_subdir:",     results_subdir )
-    cat( "\ndest:",     dest )
+    setup_scripts   = file.path("scripts", setup_scripts )
+    analyses_to_run = file.path("scripts", analyses_to_run )
+    cat( "\n project_directory: ", project_directory)
+    cat( "\n setup_scripts: ",     setup_scripts)
+    cat( "\n analyses_to_run:",    analyses_to_run )
+    cat( "\n results_subdir:",     results_subdir )
+    cat( "\n destination:",        dest )
 
     freezr::freeze( analyses_to_run = c( setup_scripts, analyses_to_run )  ,
                     destination     = dest,

@@ -24,7 +24,7 @@ Otherwise, "flash_freeze" takes these args:
 \item "analyses_to_run" should be a character vector containing paths to R or .Rmd files in your "scripts" folder
 \item "results_subdir" should be a character vector to be added onto the "results" folder before
 It's optional, and if NULL (recommended), it names the results subfolder after the subfolder 
-of the first analysis script. This way, the organizational structure is mirrored between the
+of the last analysis script. This way, the organizational structure is mirrored between the
 analysis scripts and the results.
 \item ... extra args passed to "freeze"
 }

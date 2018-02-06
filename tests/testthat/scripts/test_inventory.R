@@ -40,9 +40,9 @@ test_that("deprecated inventory call still works (Test with extra arg)",
                                                                         "but if it were from one of my scientific projects",
                                                                         "I would ideally write about its origin, the processing it ",
                                                                         "has undergone, and its purpose." ) ) )})
-assertthat::are_equal(f1_abs, suppressWarnings(inventory( tag = "my_dummy_output" )))
-assertthat::are_equal(f1_abs, suppressWarnings(inventory( tag = "my_dummy_output_2" )))
-assertthat::are_equal(f1_abs, suppressWarnings(inventory( tag = "my_dummy_output_3" )))
+assertthat::are_equal(f1_abs, inventory( tag = "my_dummy_output" ))
+assertthat::are_equal(f1_abs, inventory( tag = "my_dummy_output_2" ))
+assertthat::are_equal(f1_abs, inventory( tag = "my_dummy_output_3" ))
 
 # # New functions # #
 test_that( "inventory_show errs when inv absent but works and warns with make_new", {
