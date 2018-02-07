@@ -4,13 +4,17 @@
 \alias{freeze}
 \title{Run an analysis while freezing a copy of the code (and perhaps dependencies) for later perusal.}
 \usage{
-freeze(analyses_to_run, destination, run_from_cryo_storage = FALSE,
-  dependencies = NULL, seed_to_set = NULL, timestamp_as_folder = TRUE,
-  force = FALSE, copy_deps_kb_limit = 100, purl_aggressively = TRUE,
-  chastise = TRUE, notes_file = "notes.md", repos_to_track = NULL)
+freeze(analyses_to_run, prefix_omit = "scripts", destination,
+  run_from_cryo_storage = FALSE, dependencies = NULL, seed_to_set = NULL,
+  timestamp_as_folder = TRUE, force = FALSE, copy_deps_kb_limit = 100,
+  purl_aggressively = TRUE, chastise = TRUE, notes_file = "notes.md",
+  repos_to_track = NULL)
 }
 \arguments{
 \item{analyses_to_run}{R or R markdown files to be run and frozen.}
+
+\item{prefix_omit}{\code{freeze} archives your code in a way that preserves folder structures, 
+but if you want to omit a prefix, specify it here.}
 
 \item{destination}{Where to save the code (and log, and maybe dependencies and output)}
 
@@ -55,7 +59,7 @@ Run an analysis while freezing a copy of the code (and perhaps dependencies) for
 }
 \examples{
 
-#setwd( file.path( "~", "my_freezr_example_project", "scripts" ), )
-#freeze( analyses_to_run = c( "my_functions.Rmd", "my_script.R" ),
+#setwd( file.path( "~", "my_freezr_example_project" ), )
+#freeze( analyses_to_run = c( "scripts/my_functions.Rmd", "scripts/my_script.R" ),
 #        destination = file.path("~", "my_freezr_example_project", "results") )
 }

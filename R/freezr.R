@@ -5,6 +5,8 @@
 #'
 #' @export
 #' @param analyses_to_run R or R markdown files to be run and frozen.
+#' @param prefix_omit \code{freeze} archives your code in a way that preserves folder structures, 
+#' but if you want to omit a prefix, specify it here. 
 #' @param destination Where to save the code (and log, and maybe dependencies and output)
 #' @param run_from_cryo_storage If \code{FALSE} (default), runs the code from the current working directory.
 #' If \code{TRUE}, runs from \code{destination} (or a folder within it -- see param \code{timestamp_as_folder}).
@@ -32,10 +34,11 @@
 #' @return returns \code{destination} arg.
 #' @examples
 #' 
-#' #setwd( file.path( "~", "my_freezr_example_project", "scripts" ), )
-#' #freeze( analyses_to_run = c( "my_functions.Rmd", "my_script.R" ),
+#' #setwd( file.path( "~", "my_freezr_example_project" ), )
+#' #freeze( analyses_to_run = c( "scripts/my_functions.Rmd", "scripts/my_script.R" ),
 #' #        destination = file.path("~", "my_freezr_example_project", "results") )
-freeze = function( analyses_to_run,
+freeze = function( analyses_to_run, 
+                   prefix_omit = "scripts",
                    destination,
                    run_from_cryo_storage = FALSE,
                    dependencies = NULL,
@@ -58,10 +61,12 @@ freeze = function( analyses_to_run,
     } else {
       notes_length = nchar( paste( trimws( readLines( notes_file ) ), collapse = "" ) )
       if( notes_length <= 50 ){
-        cat("Your notes.txt file has", notes_length, "non-whitespace character(s). \n")
+        cat("\nYour notes.txt file has only ", notes_length, " non-whitespace character(s). \n")
         cat("Fine, I mean, whatever. It's your research, not mine... \n")
       } else {
-        cat("I see you have a notes.txt file with", notes_length, "non-whitespace characters! \n Keep up the good work! \n")
+        cat("\nI see you have a notes.txt file with", 
+            notes_length, 
+            "non-whitespace characters! \n Keep up the good work! \n")
       }
     }
   }
@@ -93,10 +98,24 @@ freeze = function( analyses_to_run,
     sink( file = outfile_text )
     if( !is.null( seed_to_set ) ) { set.seed( seed_to_set ) }
     for( analysis_i in analyses_to_run ){
-      # Run script from appropriate wd
-      frozen_analysis_i = file.path( destination, "code", analysis_i )
-      if( !dir.exists( dirname( frozen_analysis_i ) ) ){ dir.create( dirname( frozen_analysis_i ) )}
+      cat("\n Freezing and running ", analysis_i, "\n")
+      if( !file.exists( analysis_i ) ){
+        sink_reset()
+        stop(paste0("\nfreezr::freeze couldn't find the analysis script at: ", analysis_i, " .\n" ))
+      } 
+      # Do the actual freezing! 
+      my_pattern = paste0( prefix_omit, "|", prefix_omit, .Platform$file.sep )
+      frozen_analysis_i = file.path( destination, 
+                                     "code",
+                                     gsub( pattern = my_pattern, 
+                                           replacement = "", 
+                                           analysis_i ) )
+      if( !dir.exists( dirname( frozen_analysis_i ) ) ){ 
+        dir.create( dirname( frozen_analysis_i ) )
+      }
       file.copy( from = analysis_i, to = frozen_analysis_i )
+      
+      # Run script from appropriate wd
       if( run_from_cryo_storage ){
         old_wd = getwd()
         setwd( destination )
@@ -218,7 +237,7 @@ configure_flash_freeze = function( project_directory = getwd(),
   cat("\n")
   cat("Will work from: ",      project_directory, "\n")
   cat("Will run these setup scripts at each call: ", setup_scripts, "\n")
-  cat("Will track these repos: ", repos_to_track, "\n")
+  cat("Will track these repos: \n", repos_to_track, "\n")
   
   if( any( grepl("scripts", setup_scripts) ) ) {
     stop("setup_scripts paths should be relative to <my_project>/scripts/.")
