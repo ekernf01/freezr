@@ -237,6 +237,7 @@ freeze = function( analyses_to_run,
 configure_flash_freeze = function( project_directory = getwd(), 
                                    setup_scripts = NULL, 
                                    repos_to_track = project_directory ){
+  project_directory = path.expand(project_directory)
   cat("\n")
   cat("Will work from: ",      project_directory, "\n")
   cat("Will run these setup scripts at each call: ", setup_scripts, "\n")
