@@ -28,7 +28,8 @@
 inventory_add = function( tag = NULL, inv_location = NULL, filename = NULL,
                           extra = "", parent_tag = "",
                           force = FALSE ){
-
+  filename = path.expand(filename)
+  
   if( !is.null( tag ) ) { assertthat::assert_that( tag!="" ) }
   if( length( grep( x=extra, pattern = "\t", fixed = T ) ) > 0 ){
     stop("Sorry, inventories are tab-delimited. `extra` field may not contain tabs.")
@@ -39,11 +40,11 @@ inventory_add = function( tag = NULL, inv_location = NULL, filename = NULL,
   inv_location = dirname(inventory_path)
 
   # # Check whether filename exists.
-  relative = (substring(filename, 1, 1)[[1]]!=.Platform$file.sep )
-  if( relative ){
-    filename_full = file.path( inv_location, filename )
-  } else {
+  absolute = R.utils::isAbsolutePath(filename)
+  if( absolute ){
     filename_full = filename
+  } else {
+    filename_full = file.path( inv_location, filename )
   }
   if( !file.exists( filename_full ) ){
     warning( paste0("The file you're adding, ", filename_full, ", does not exist! Adding it anyway.\n") )

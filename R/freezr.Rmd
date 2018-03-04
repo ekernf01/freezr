@@ -50,7 +50,7 @@ freeze = function( analyses_to_run,
                    force = FALSE,
                    copy_deps_kb_limit = 100,
                    purl_aggressively = TRUE,
-                   chastise = TRUE,
+                   chastise = FALSE,
                    notes_file = "notes.md", 
                    repos_to_track = NULL ){
   # # Nag user about leaving themselves notes.
@@ -75,7 +75,11 @@ freeze = function( analyses_to_run,
   }
 
   # # Prepare and announce destination
-  destination = file.path( destination, format( Sys.time(), "%Y_%b_%d__%H_%M_%S") )
+  script_name = basename(rev(analyses_to_run)[1])
+  script_name = gsub(".R$|.Rmd$", "", script_name, ignore.case = T)
+  save_dir = paste0( format( Sys.time(), "%Y_%b_%d__%H_%M_%S"), "__", script_name)
+  
+  destination = file.path( destination, save_dir )
   dir.create( destination, recursive = TRUE )
   empty = ( 0 == length( list.files( destination, all.files = TRUE, include.dirs = TRUE, no.. = TRUE ) ) )
   if( file.exists( destination ) && !empty && !force ){
@@ -87,7 +91,7 @@ freeze = function( analyses_to_run,
     warning( paste( "freezr is modifying a folder that already has something in it.",
                     "If that makes you nervous, try setting `timestamp_as_folder=TRUE`. ") )
   }
-  cat( paste0( "Saving analysis tools to `", destination, "`.\n" ) )
+  cat( paste0( "\nSaving analysis tools to `", destination, "`.\n" ) )
 
   # # run analyses and freeze them, capturing graphics and text.
   dir.create( file.path( destination, "output" ), recursive = T )

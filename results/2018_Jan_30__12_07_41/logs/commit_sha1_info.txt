@@ -1,2 +1,0 @@
-path_to_repo	hash
-/Users/erickernfeld/Desktop/software_projects/freezr	e3afd34884c5accb8439beb8081a9f4da5231fb4

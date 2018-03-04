@@ -1,7 +1,6 @@
 # # Helpful stuff # #
 
-library(testthat)
-
+context("inventory")
 
 # Files to use as guinea pigs
 f1 = f1_rel = file.path( "inventory_guinea_pig", "user", "custom_user_output.txt" )
@@ -14,35 +13,13 @@ f1_abs = file.path( results_path, f1 )
 
 # Cleanup procedure from previous testing
 clean_up_inv = function(){
-  if(inventory_find(f1_abs, return_existence_logical = TRUE)){
+  if(inventory_exists(f1_abs)){
     file.remove( inventory_find(f1_abs) )
   }
-  if(inventory_find(dirname(f1_abs), return_existence_logical = TRUE)){
+  if(inventory_exists(dirname(f1_abs))){
     file.remove( inventory_find(f1_abs) )
   }
 }
-
-# # Old functions # #
-# # Testing
-clean_up_inv()
-test_that( "deprecated inventory call still works (Test with no args)",
-                     {expect_warning(inventory())})
-test_that( "deprecated inventory call still works (Test with essential args)",
-                     {expect_warning(inventory( tag="my_dummy_output", filename=f1 ))})
-test_that( "deprecated inventory call still works (Test with parent_tag arg)",
-                     {expect_warning(inventory( tag="my_dummy_output_3",
-                                                        filename = f1,
-                                                        parent_tag = "my_dummy_output_2" ))})
-test_that("deprecated inventory call still works (Test with incorrect arg)",
-          {expect_warning(inventory( tag="this_tag_doesnt_exist", delete = T ))})
-test_that("deprecated inventory call still works (Test with extra arg)",
-          {expect_warning(inventory( tag="my_dummy_output_2", filename=f1, extra = paste( "This file is just some dummy output",
-                                                                        "but if it were from one of my scientific projects",
-                                                                        "I would ideally write about its origin, the processing it ",
-                                                                        "has undergone, and its purpose." ) ) )})
-assertthat::are_equal(f1_abs, suppressWarnings(inventory( tag = "my_dummy_output" )))
-assertthat::are_equal(f1_abs, suppressWarnings(inventory( tag = "my_dummy_output_2" )))
-assertthat::are_equal(f1_abs, suppressWarnings(inventory( tag = "my_dummy_output_3" )))
 
 # # New functions # #
 test_that( "inventory_show errs when inv absent but works and warns with make_new", {
@@ -62,12 +39,12 @@ test_that( "make works", {
 test_that( "find works", {
   clean_up_inv()
   inventory_make( results_path )
-  assertthat::assert_that(inventory_find(f1_abs, return_existence_logical = T))
-  assertthat::assert_that(inventory_find(dirname(f1_abs), return_existence_logical = T))
+  testthat::expect_true(inventory_exists(        f1_abs))
+  testthat::expect_true(inventory_exists(dirname(f1_abs)))
   inventory_find( )
   clean_up_inv()
-  assertthat::assert_that(!inventory_find(f1_abs, return_existence_logical = T))
-  assertthat::assert_that(!inventory_find(dirname(f1_abs), return_existence_logical = T))
+  testthat::expect_false(inventory_exists(        f1_abs))
+  testthat::expect_false(inventory_exists(dirname(f1_abs)))
   clean_up_inv()
 })
 
@@ -80,16 +57,6 @@ test_that( "add works after make", {
   clean_up_inv()
 })
 
-test_that( "add works with extra args", {
-  clean_up_inv()
-  inventory_make( results_path )
-  inventory_add( tag="my_dummy_output_2", filename = f1, parent_tag = "my_dummy_output_2" )
-  inventory_add( tag="my_dummy_output_3", filename=f1, extra = paste( "This file is just some dummy output",
-                                                                              "but if it were from one of my scientific projects",
-                                                                              "I would ideally write about its origin, the processing it ",
-                                                                              "has undergone, and its purpose." ) )
-  clean_up_inv()
-})
 
 test_that( "get works with incorrect arg", {
   clean_up_inv()
@@ -101,8 +68,14 @@ test_that( "get works with incorrect arg", {
 test_that( "get works with correct args", {
   clean_up_inv()
   inventory_make( results_path )
-  inventory_add( tag="my_dummy_output_2", filename = f1, parent_tag = "my_dummy_output_2" )
-  assertthat::are_equal(f1_abs, inventory_get( tag = "my_dummy_output_2" ))
+  inventory_add( tag="my_dummy_output_2",
+                 filename = f1,
+                 parent_tag = "my_dummy_output_2",
+                 extra = paste( "This file is just some dummy output",
+                                "but if it were from one of my scientific projects",
+                                "I would ideally write about its origin, the processing it ",
+                                "has undergone, and its purpose."  ))
+  testthat::expect_equal(f1_abs, inventory_get( tag = "my_dummy_output_2" ))
   clean_up_inv()
 })
 

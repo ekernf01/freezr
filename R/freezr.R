@@ -72,7 +72,11 @@ freeze = function( analyses_to_run,
   }
 
   # # Prepare and announce destination
-  destination = file.path( destination, format( Sys.time(), "%Y_%b_%d__%H_%M_%S") )
+  script_name = dirname(rev(analyses_to_run)[1])
+  script_name = gsub(".R$|.Rmd$", "", script_name, ignore.case = T)
+  save_dir = paste0( format( Sys.time(), "%Y_%b_%d__%H_%M_%S"), "__", script_name)
+  
+  destination = file.path( destination, save_dir )
   dir.create( destination, recursive = TRUE )
   empty = ( 0 == length( list.files( destination, all.files = TRUE, include.dirs = TRUE, no.. = TRUE ) ) )
   if( file.exists( destination ) && !empty && !force ){
