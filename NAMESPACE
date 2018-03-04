@@ -3,7 +3,6 @@
 export(configure_flash_freeze)
 export(create_empty_project)
 export(freeze)
-export(inventory)
 export(inventory_add)
 export(inventory_check)
 export(inventory_exists)

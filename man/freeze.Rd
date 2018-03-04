@@ -7,7 +7,7 @@
 freeze(analyses_to_run, prefix_omit = "scripts", destination,
   run_from_cryo_storage = FALSE, dependencies = NULL, seed_to_set = NULL,
   timestamp_as_folder = TRUE, force = FALSE, copy_deps_kb_limit = 100,
-  purl_aggressively = TRUE, chastise = TRUE, notes_file = "notes.md",
+  purl_aggressively = TRUE, chastise = FALSE, notes_file = "notes.md",
   repos_to_track = NULL)
 }
 \arguments{

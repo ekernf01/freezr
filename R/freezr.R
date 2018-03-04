@@ -47,7 +47,7 @@ freeze = function( analyses_to_run,
                    force = FALSE,
                    copy_deps_kb_limit = 100,
                    purl_aggressively = TRUE,
-                   chastise = TRUE,
+                   chastise = FALSE,
                    notes_file = "notes.md", 
                    repos_to_track = NULL ){
   # # Nag user about leaving themselves notes.
@@ -72,7 +72,7 @@ freeze = function( analyses_to_run,
   }
 
   # # Prepare and announce destination
-  script_name = dirname(rev(analyses_to_run)[1])
+  script_name = basename(rev(analyses_to_run)[1])
   script_name = gsub(".R$|.Rmd$", "", script_name, ignore.case = T)
   save_dir = paste0( format( Sys.time(), "%Y_%b_%d__%H_%M_%S"), "__", script_name)
   
@@ -88,7 +88,7 @@ freeze = function( analyses_to_run,
     warning( paste( "freezr is modifying a folder that already has something in it.",
                     "If that makes you nervous, try setting `timestamp_as_folder=TRUE`. ") )
   }
-  cat( paste0( "Saving analysis tools to `", destination, "`.\n" ) )
+  cat( paste0( "\nSaving analysis tools to `", destination, "`.\n" ) )
 
   # # run analyses and freeze them, capturing graphics and text.
   dir.create( file.path( destination, "output" ), recursive = T )
@@ -169,8 +169,16 @@ freeze = function( analyses_to_run,
   }
 
   # # Save info on package versions and save hashes of relevant repos.
-  logfile_session = file.path( destination, "logs", "sessionInfo.txt" )
-  cat( x = paste0( utils::capture.output( utils::sessionInfo() ), collapse = "\n"), file = logfile_session)
+  logfile_session = file.path( destination, "logs", "session_info.txt" )
+  if(requireNamespace("devtools", quietly=TRUE)){
+    my_sesh = paste0( utils::capture.output( devtools::session_info() ), collapse = "\n")
+
+  } else {
+    warning("\nInstalling devtools is recommended, as devtools::session_info() is more useful than the base R sessionInfo(). ")
+    my_sesh = paste0( utils::capture.output( sessionInfo() ), collapse = "\n")
+  }
+  cat( x = my_sesh, file = logfile_session, sep = "\n")
+
   
   logfile_commit = file.path( destination, "logs", "commit_sha1_info.txt" )
   repo_hashes = data.frame( path_to_repo = paste0( repos_to_track ),

@@ -172,8 +172,16 @@ freeze = function( analyses_to_run,
   }
 
   # # Save info on package versions and save hashes of relevant repos.
-  logfile_session = file.path( destination, "logs", "sessionInfo.txt" )
-  cat( x = paste0( utils::capture.output( utils::sessionInfo() ), collapse = "\n"), file = logfile_session)
+  logfile_session = file.path( destination, "logs", "session_info.txt" )
+  if(requireNamespace("devtools", quietly=TRUE)){
+    my_sesh = paste0( utils::capture.output( devtools::session_info() ), collapse = "\n")
+
+  } else {
+    warning("\nInstalling devtools is recommended, as devtools::session_info() is more useful than the base R sessionInfo(). ")
+    my_sesh = paste0( utils::capture.output( sessionInfo() ), collapse = "\n")
+  }
+  cat( x = my_sesh, file = logfile_session, sep = "\n")
+
   
   logfile_commit = file.path( destination, "logs", "commit_sha1_info.txt" )
   repo_hashes = data.frame( path_to_repo = paste0( repos_to_track ),
