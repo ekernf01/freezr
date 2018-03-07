@@ -123,20 +123,29 @@ freeze = function( analyses_to_run,
       if( run_from_cryo_storage ){
         old_wd = getwd()
         setwd( destination )
-        my_err = tryCatch( expr = { run_r_or_rmd( frozen_analysis_i, destination ) }, error = function(e) e )
+        my_err = tryCatch( expr = { run_r_or_rmd( frozen_analysis_i, destination ) }, 
+                           error = function(e) conditionMessage(e) )
         setwd( old_wd )
       } else {
-        my_err = tryCatch( expr = { run_r_or_rmd( frozen_analysis_i, destination ) }, error = function(e) e )
+        my_err = tryCatch( expr = { run_r_or_rmd( frozen_analysis_i, destination ) }, 
+                           error = function(e) conditionMessage(e) )
       }
-      # TODO: Send errors and tracebacks (traces back?) to logfile
-      # if( !is.null( my_err ) ){
-      #   logfile = file.path( destination, "logs", paste0( analysis_i, ".log" ) )
-      #   warning( paste0( "Error when running ", analysis_i, "; check ", logfile, " for error and traceback.\n " ) ) 
-      #   sink( logfile )
-      #   print(my_err)
-      #   print(traceback())
-      #   sink()
-      # }
+     # TODO: Send traceback to logfile
+      if( !is.null( my_err ) ){
+        logfile = file.path( destination, "logs", paste0( analysis_i, ".log" ) )
+        warning( paste0( "\nError when running ",
+                         analysis_i,
+                         "; check ",
+                         logfile,
+                         " for error and traceback.\n " ) )
+
+        if( !dir.exists( dirname( logfile ) ) ){
+          dir.create( dirname( logfile ) )
+        }
+        cat(my_err,                      sep = "\n", file = logfile)
+        cat("\n\n", file = logfile)
+        cat(capture.output(traceback()), sep = "\n", file = logfile)
+      }
     }
     sink_reset()
     grDevices::dev.off()
