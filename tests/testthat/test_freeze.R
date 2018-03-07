@@ -15,9 +15,9 @@ test_dest = freezr::freeze( analyses_to_run = file.path( "scripts",
 
 # Test with a script that throws an error
 Sys.sleep(2) #time stamps have a 1-second resolution, so need this to avoid collisions.
-freezr::freeze( analyses_to_run = file.path("scripts", "script_that_fails.R" ),
-                chastise = F,
-                destination = file.path(getwd(), "results") )
+testthat::expect_warning(freezr::freeze( analyses_to_run = file.path("scripts", "script_that_fails.R" ),
+                                         chastise = F,
+                                         destination = file.path(getwd(), "results") ))
 
 # Test with code files further down in the working directory
 Sys.sleep(2) #time stamps have a 1-second resolution, so need this to avoid collisions.
