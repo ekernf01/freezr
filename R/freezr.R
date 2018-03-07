@@ -5,8 +5,8 @@
 #'
 #' @export
 #' @param analyses_to_run R or R markdown files to be run and frozen.
-#' @param prefix_omit \code{freeze} archives your code in a way that preserves folder structures, 
-#' but if you want to omit a prefix, specify it here. 
+#' @param prefix_omit \code{freeze} archives your code in a way that preserves folder structures,
+#' but if you want to omit a prefix, specify it here.
 #' @param destination Where to save the code (and log, and maybe dependencies and output)
 #' @param run_from_cryo_storage If \code{FALSE} (default), runs the code from the current working directory.
 #' If \code{TRUE}, runs from \code{destination} (or a folder within it -- see param \code{timestamp_as_folder}).
@@ -28,16 +28,16 @@
 #' @param chastise If \code{TRUE} (default), creates a \code{notes.txt} file for you and nags
 #' you about filling it.
 #' @param notes_file Name of file to be created while \code{chastise}ing.
-#' @param repos_to_track For git users. If you want to record what commit some outside repo is on -- for 
+#' @param repos_to_track For git users. If you want to record what commit some outside repo is on -- for
 #' example, a package that you are developing separate from your data analysis repo -- put
-#' the path here. You can put more than one. 
+#' the path here. You can put more than one.
 #' @return returns \code{destination} arg.
 #' @examples
-#' 
+#'
 #' #setwd( file.path( "~", "my_freezr_example_project" ), )
 #' #freeze( analyses_to_run = c( "scripts/my_functions.Rmd", "scripts/my_script.R" ),
 #' #        destination = file.path("~", "my_freezr_example_project", "results") )
-freeze = function( analyses_to_run, 
+freeze = function( analyses_to_run,
                    prefix_omit = "scripts",
                    destination,
                    run_from_cryo_storage = FALSE,
@@ -48,7 +48,7 @@ freeze = function( analyses_to_run,
                    copy_deps_kb_limit = 100,
                    purl_aggressively = TRUE,
                    chastise = FALSE,
-                   notes_file = "notes.md", 
+                   notes_file = "notes.md",
                    repos_to_track = NULL ){
   # # Nag user about leaving themselves notes.
   notes_file = file.path( destination, "notes.md" )
@@ -64,8 +64,8 @@ freeze = function( analyses_to_run,
         cat("\nYour notes.txt file has only ", notes_length, " non-whitespace character(s). \n")
         cat("Fine, I mean, whatever. It's your research, not mine... \n")
       } else {
-        cat("\nI see you have a notes.txt file with", 
-            notes_length, 
+        cat("\nI see you have a notes.txt file with",
+            notes_length,
             "non-whitespace characters! \n Keep up the good work! \n")
       }
     }
@@ -75,7 +75,7 @@ freeze = function( analyses_to_run,
   script_name = basename(rev(analyses_to_run)[1])
   script_name = gsub(".R$|.Rmd$", "", script_name, ignore.case = T)
   save_dir = paste0( format( Sys.time(), "%Y_%b_%d__%H_%M_%S"), "__", script_name)
-  
+
   destination = file.path( destination, save_dir )
   dir.create( destination, recursive = TRUE )
   empty = ( 0 == length( list.files( destination, all.files = TRUE, include.dirs = TRUE, no.. = TRUE ) ) )
@@ -101,37 +101,39 @@ freeze = function( analyses_to_run,
     grDevices::pdf( outfile_graphics )
     sink( file = outfile_text )
     if( !is.null( seed_to_set ) ) { set.seed( seed_to_set ) }
+    error_free = T
     for( analysis_i in analyses_to_run ){
       cat("\n Freezing and running ", analysis_i, "\n")
       if( !file.exists( analysis_i ) ){
         sink_reset()
         stop(paste0("\nfreezr::freeze couldn't find the analysis script at: ", analysis_i, " .\n" ))
-      } 
-      # Do the actual freezing! 
+      }
+      # Do the actual freezing!
       my_pattern = paste0( prefix_omit, "|", prefix_omit, .Platform$file.sep )
-      frozen_analysis_i = file.path( destination, 
+      frozen_analysis_i = file.path( destination,
                                      "code",
-                                     gsub( pattern = my_pattern, 
-                                           replacement = "", 
+                                     gsub( pattern = my_pattern,
+                                           replacement = "",
                                            analysis_i ) )
-      if( !dir.exists( dirname( frozen_analysis_i ) ) ){ 
+      if( !dir.exists( dirname( frozen_analysis_i ) ) ){
         dir.create( dirname( frozen_analysis_i ) )
       }
       file.copy( from = analysis_i, to = frozen_analysis_i )
-      
+
       # Run script from appropriate wd
       if( run_from_cryo_storage ){
         old_wd = getwd()
         setwd( destination )
-        my_err = tryCatch( expr = { run_r_or_rmd( frozen_analysis_i, destination ) }, 
+        my_err = tryCatch( expr = { run_r_or_rmd( frozen_analysis_i, destination ) },
                            error = function(e) conditionMessage(e) )
         setwd( old_wd )
       } else {
-        my_err = tryCatch( expr = { run_r_or_rmd( frozen_analysis_i, destination ) }, 
+        my_err = tryCatch( expr = { run_r_or_rmd( frozen_analysis_i, destination ) },
                            error = function(e) conditionMessage(e) )
       }
      # TODO: Send traceback to logfile
       if( !is.null( my_err ) ){
+        error_free = F
         logfile = file.path( destination, "logs", paste0( analysis_i, ".log" ) )
         warning( paste0( "\nError when running ",
                          analysis_i,
@@ -148,6 +150,15 @@ freeze = function( analyses_to_run,
       }
     }
     sink_reset()
+
+    logfile = file.path( destination, "logs", "was_it_error_free.txt" )
+    if(error_free){
+      cat("Yes!", file = logfile)
+      message("\n ======== Congratulations! ======== \n Everything ran with no errors.\n")
+    } else {
+      cat("Nope!", file = logfile)
+      warning("\nSome of your scripts have errors. Check the logs for details.\n")
+    }
     grDevices::dev.off()
   }
 
@@ -188,7 +199,7 @@ freeze = function( analyses_to_run,
   }
   cat( x = my_sesh, file = logfile_session, sep = "\n")
 
-  
+
   logfile_commit = file.path( destination, "logs", "commit_sha1_info.txt" )
   repo_hashes = data.frame( path_to_repo = paste0( repos_to_track ),
                             stringsAsFactors = FALSE ) #goddamn factors fuck up everything
@@ -197,11 +208,11 @@ freeze = function( analyses_to_run,
     tryCatch({
       hash = system2("git", args = c( " -C ", path_to_repo, " rev-parse HEAD"), stdout = TRUE )
       return( hash )
-    }, 
+    },
     error = function(e){
       warning( paste0( "Error when trying to obtain hash of repo at ", path_to_repo, ":\n", gettext( e ) ) )
       return( "" )
-    }, 
+    },
     warning = function(w){
       warning( paste0( "Warning when trying to obtain hash of repo at ", path_to_repo, ":\n", gettext( w ) ) )
       return( "" )
@@ -221,7 +232,7 @@ freeze = function( analyses_to_run,
                       copy_deps_kb_limit = copy_deps_kb_limit,
                       purl_aggressively = purl_aggressively,
                       chastise = chastise,
-                      notes_file = notes_file, 
+                      notes_file = notes_file,
                       repos_to_track = repos_to_track )
   logfile = file.path( destination, "logs", "freeze_call.txt" )
   saveRDS( freeze_call, file.path( destination, "logs", "freeze_call_RDS.data" ) )
@@ -233,34 +244,34 @@ freeze = function( analyses_to_run,
   return( invisible( destination ) )
 }
 
-#' Return a function "flash_freeze" that saves on project-specific boilerplate compared to "freeze". 
-#' 
+#' Return a function "flash_freeze" that saves on project-specific boilerplate compared to "freeze".
+#'
 #' @param project_directory Where's your freezr project? Should contain subdirectories "results" and "scripts." Try "freezr::create_empty_project".
 #' @param setup_scripts Scripts to be run first every time you flash_freeze an analysis. Helps avoid copy-pasting code. For example, a setup script might load packages, utility functions, or reusable functions that you haven't yet packaged up.
-#' @param repos_to_track Helps track outside repos. See corresponding arg of `freeze`. 
+#' @param repos_to_track Helps track outside repos. See corresponding arg of `freeze`.
 #'
-#' 
-#' @details When run without args, this "flash_freeze" runs the setup scripts and saves to the "interactive" folder. Your namespace retains objects created by the setup scripts, so you can experience what your analysis scripts are experiencing. 
-#' Otherwise, "flash_freeze" takes these args: 
+#'
+#' @details When run without args, this "flash_freeze" runs the setup scripts and saves to the "interactive" folder. Your namespace retains objects created by the setup scripts, so you can experience what your analysis scripts are experiencing.
+#' Otherwise, "flash_freeze" takes these args:
 #' \itemize{
 #' \item "analyses_to_run" should be a character vector containing paths to R or .Rmd files in your "scripts" folder
 #' \item "results_subdir" should be a character vector to be added onto the "results" folder before
-#' It's optional, and if NULL (recommended), it names the results subfolder after the subfolder 
+#' It's optional, and if NULL (recommended), it names the results subfolder after the subfolder
 #' of the last analysis script. This way, the organizational structure is mirrored between the
 #' analysis scripts and the results.
 #' \item ... extra args passed to "freeze"
 #' }
 #' @export
-#' 
-configure_flash_freeze = function( project_directory = getwd(), 
-                                   setup_scripts = NULL, 
+#'
+configure_flash_freeze = function( project_directory = getwd(),
+                                   setup_scripts = NULL,
                                    repos_to_track = project_directory ){
   project_directory = path.expand(project_directory)
   cat("\n")
   cat("Will work from: ",      project_directory, "\n")
   cat("Will run these setup scripts at each call: ", setup_scripts, "\n")
   cat("Will track these repos: \n", repos_to_track, "\n")
-  
+
   if( any( grepl("scripts", setup_scripts) ) ) {
     stop("setup_scripts paths should be relative to <my_project>/scripts/.")
   }
@@ -272,16 +283,16 @@ configure_flash_freeze = function( project_directory = getwd(),
     if ( any( grepl("results", results_subdir ) ) ) {
       stop("results paths should be relative to <my_project>/results/.")
     }
-    
+
     # Set default results subdir to mirror script subdirectory
     if(is.null(results_subdir)){
       if(is.null(analyses_to_run)){
         results_subdir = "interactive"
       } else {
-        results_subdir = dirname(rev(analyses_to_run)[1]) 
+        results_subdir = dirname(rev(analyses_to_run)[1])
       }
     }
-    
+
     # Handle case when there is no subdir between "scripts/" and "analyses_to_run"
     if(results_subdir=="." ){
       dest = file.path( project_directory, "results")
@@ -304,14 +315,14 @@ configure_flash_freeze = function( project_directory = getwd(),
   return( flash_freeze )
 }
 
-#' Create a template project suitable for use with freezr. 
+#' Create a template project suitable for use with freezr.
 #'
 #' @export
-#' 
+#'
 create_empty_project = function( directory ){
   cat("Sorry, create_empty_project has not been implemented yet. Please nag eric about this.")
 }
-  
+
 
 ## ---- eval = F-----------------------------------------------------------
 ## #' Check frozen dependencies for changes.
@@ -325,7 +336,7 @@ create_empty_project = function( directory ){
 ##   timestamp = format( Sys.time(), "%Y_%b_%d|%H_%M_%S")
 ##   dep_check_res_path = file.path( freeze_path, "dependency_diffs", timestamp )
 ##   suppressWarnings( dir.create( dep_check_res_path ) )
-## 
+##
 ##   # Retrieve recorded dependencies
 ##   freeze_call = readRDS( file.path( freeze_path, "logs", "freeze_call_RDS.data" ) )
 ##   dependencies = freeze_call$dependencies
@@ -336,7 +347,7 @@ create_empty_project = function( directory ){
 ##                      orig_still_identical = rep(NA, length(dependencies)),
 ##                      pct_diff = rep(NA, length(dependencies)),
 ##                      stringsAsFactors = FALSE)
-## 
+##
 ##   # Go through each file and compare frozen version with current version.
 ##   for( ii in seq_along( deps$name ) ){
 ##     orig   = deps$full_path[[ii]]
@@ -360,7 +371,7 @@ create_empty_project = function( directory ){
 ##   }
 ##   return( deps )
 ## }
-## 
+##
 ## #' Run an analysis previously frozen by \code{freezr::freeze}.
 ## #'
 ## #' @export
@@ -374,11 +385,11 @@ create_empty_project = function( directory ){
 ## thaw = function( freeze_path, thaw_path = NULL, verbose = T ){
 ##   warning("Thaw is not working yet. Stay tuned!")
 ##   return()
-## 
+##
 ##   # # Retrieve original call to freezr::freeze
 ##   freeze_call = readRDS( file.path( freeze_path, "logs", "freeze_call_RDS.data" ) )
 ##   thaw_call = freeze_call
-## 
+##
 ##   # # Execute freezr::freeze call as done originally
 ##   setwd( readLines(file.path(freeze_call$destination, "logs", "freeze_call_wd.txt")) )
 ##   if( is.null( thaw_path ) ){
@@ -387,10 +398,10 @@ create_empty_project = function( directory ){
 ##     thaw_call$destination = thaw_path
 ##   }
 ##   do.call( what = freezr::freeze, args = thaw_call )
-## 
+##
 ##   # # Check environment for changes
-## 
-## 
+##
+##
 ##   # # Check dependencies for changes
 ##   if( !is.null( freeze_call$dependencies) )
 ##   {
@@ -398,9 +409,9 @@ create_empty_project = function( directory ){
 ##   } else {
 ##     deps = NULL
 ##   }
-## 
+##
 ##   # # Put thaw report in folder with re-frozen results
 ##   Sys.getenv("FREEZR_DESTINATION")
 ## }
-## 
+##
 

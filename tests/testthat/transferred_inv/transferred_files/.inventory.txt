@@ -1,4 +1,0 @@
-tag	parent_tag	date_modified	filename	extra
-f1_rel	NA	2018_Mar_06|21_28_48	f1_rel.txt	NA
-file_no_ext	NA	2018_Mar_06|21_28_48	file_no_ext.txt	NA
-folder	NA	2018_Mar_06|21_28_48	folder	NA
