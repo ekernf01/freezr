@@ -104,6 +104,7 @@ freeze = function( analyses_to_run,
     grDevices::pdf( outfile_graphics )
     sink( file = outfile_text )
     if( !is.null( seed_to_set ) ) { set.seed( seed_to_set ) }
+    error_free = T
     for( analysis_i in analyses_to_run ){
       cat("\n Freezing and running ", analysis_i, "\n")
       if( !file.exists( analysis_i ) ){
@@ -135,6 +136,7 @@ freeze = function( analyses_to_run,
       }
      # TODO: Send traceback to logfile
       if( !is.null( my_err ) ){
+        error_free = F
         logfile = file.path( destination, "logs", paste0( analysis_i, ".log" ) )
         warning( paste0( "\nError when running ",
                          analysis_i,
@@ -151,6 +153,15 @@ freeze = function( analyses_to_run,
       }
     }
     sink_reset()
+    
+    logfile = file.path( destination, "logs", "was_it_error_free.txt" )
+    if(error_free){
+      cat("Yes!", file = logfile)
+      message("\n ======== Congratulations! ======== \n Everything ran with no errors.\n")
+    } else {
+      cat("Nope!", file = logfile)
+      warning("\nSome of your scripts have errors. Check the logs for details.\n")
+    }
     grDevices::dev.off()
   }
 
