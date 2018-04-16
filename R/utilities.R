@@ -14,12 +14,12 @@ run_r_or_rmd = function( file_name, destination, purl_aggressively ) {
   Sys.setenv(FREEZR_DESTINATION=file.path( destination, "user" ) )
   suppressWarnings( dir.create( file.path( destination, "user" ) ) )
   if( tolower( ext ) == "r" ) {
-    source( file_name )
+    source( name_dot_R )
   } else if( tolower( ext ) == "rmd" ){
     # Purl, source, and clean up
     if( file.exists( name_dot_R ) && !purl_aggressively ){
       warning( paste( "freezr is using existing `.R` versions of `.Rmd`",
-                   "files since you set `purl_aggressively=FALSE`." ) )
+                      "files since you set `purl_aggressively=FALSE`." ) )
     } else {
       knitr::purl( file_name, output = name_dot_R, quiet = TRUE )
     }
@@ -28,7 +28,7 @@ run_r_or_rmd = function( file_name, destination, purl_aggressively ) {
   } else {
     stop("Can only handle `.R` and `.Rmd` files.")
   }
-  return()
+  return(NULL)
 }
 
 #' Turn a ragged list of atomic vectors to a rectangle by adding filler.
@@ -51,6 +51,29 @@ pad_list = function( x, filler = "" ){
 sink_reset <- function(){
   for( i in seq_len( sink.number( ) ) ){
     sink( NULL )
+  }
+}
+
+#' A way to run code, handle errors, and (unlike tryCatch) preserve the traceback.
+#'
+#' @export
+#' @seealso Many thanks to Berry Boessenkool for sharing this very useful bit of code.
+#' \url{https://stackoverflow.com/a/40899766/3371472}
+tryStack <- function( expr, silent = FALSE ){
+  tryenv <- new.env()
+  my_handler = function(e)
+  {
+    stack <- sys.calls()
+    stack <- stack[-(2:7)]
+    stack <- head(stack, -2)
+    stack <- sapply(stack, deparse)
+    assign("stackmsg", value=paste(stack,collapse="\n"), envir=tryenv)
+  }
+  out <- try(withCallingHandlers(expr, error=my_handler), silent=silent)
+  if(inherits(out, "try-error")) {
+    return( tryenv$stackmsg )
+  } else {
+    return( out )
   }
 }
 

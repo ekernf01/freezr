@@ -124,16 +124,16 @@ freeze = function( analyses_to_run,
       file.copy( from = analysis_i, to = frozen_analysis_i )
       
       # Run script from appropriate wd
+      run_it = function() tryStack(run_r_or_rmd( frozen_analysis_i, destination ))
       if( run_from_cryo_storage ){
         old_wd = getwd()
         setwd( destination )
-        my_err = tryCatch( expr = { run_r_or_rmd( frozen_analysis_i, destination ) }, 
-                           error = function(e) conditionMessage(e) )
+        my_err = run_it()
         setwd( old_wd )
       } else {
-        my_err = tryCatch( expr = { run_r_or_rmd( frozen_analysis_i, destination ) }, 
-                           error = function(e) conditionMessage(e) )
+        my_err = run_it()
       }
+      print(frozen_analysis_i)
      # TODO: Send traceback to logfile
       if( !is.null( my_err ) ){
         error_free = F
@@ -147,19 +147,19 @@ freeze = function( analyses_to_run,
         if( !dir.exists( dirname( logfile ) ) ){
           dir.create( dirname( logfile ) )
         }
-        cat(my_err,                      sep = "\n", file = logfile)
-        cat("\n\n", file = logfile)
-        cat(capture.output(traceback()), sep = "\n", file = logfile)
+        cat(my_err,                      sep = "\n", file = logfile, append = T)
+        cat("\n\n", file = logfile, append = T)
+        cat(capture.output(traceback()), sep = "\n", file = logfile, append = T)
       }
     }
     sink_reset()
     
     logfile = file.path( destination, "logs", "was_it_error_free.txt" )
     if(error_free){
-      cat("Yes!", file = logfile)
+      cat("Yes!", file = logfile, append = T)
       message("\n ======== Congratulations! ======== \n Everything ran with no errors.\n")
     } else {
-      cat("Nope!", file = logfile)
+      cat("Nope!", file = logfile, append = T)
       warning("\nSome of your scripts have errors. Check the logs for details.\n")
     }
     grDevices::dev.off()
@@ -200,7 +200,7 @@ freeze = function( analyses_to_run,
     warning("\nInstalling devtools is recommended, as devtools::session_info() is more useful than the base R sessionInfo(). ")
     my_sesh = paste0( utils::capture.output( sessionInfo() ), collapse = "\n")
   }
-  cat( x = my_sesh, file = logfile_session, sep = "\n")
+  cat( x = my_sesh, file = logfile_session, sep = "\n", append = T)
 
   
   logfile_commit = file.path( destination, "logs", "commit_sha1_info.txt" )
