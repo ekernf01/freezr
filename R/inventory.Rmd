@@ -15,7 +15,7 @@
 #'  and \code{filename}.
 #'  This may just be notes, or you could include an underscore- and pipe-delimited list of key-value pairs;
 #'  the sky's the limit.
-#' @param force Overwrite or delete any existing entry with the given tag. Default is \code{FALSE}.
+#' @param force Bump any existing entry with the given tag, moving it to a backup with a similar name. Default is \code{TRUE}.
 #'
 #' @details \code{inventory_*} functions help track data as it passes through multiple stages of analysis.
 #'  The central data structure is a table with the filename \code{.inventory.txt}. It has five
@@ -29,7 +29,7 @@
 #'
 inventory_add = function( tag = NULL, inv_location = NULL, filename = NULL,
                           extra = "", parent_tag = "",
-                          force = FALSE ){
+                          force = TRUE ){
   filename = path.expand(filename)
   
   if( !is.null( tag ) ) { assertthat::assert_that( tag!="" ) }
@@ -54,24 +54,18 @@ inventory_add = function( tag = NULL, inv_location = NULL, filename = NULL,
 
   # if tag already present
   if( tag %in% inv$tag ){
-    ii = which(inv$tag==tag)
+    bump_tag = rev( make.unique( c( inv$tag, tag ) ) )[1]
     if( force ) {
-      warning( paste0( "Overwriting a row that currently says\n",
-                       paste0( inv[ii, ], collapse = " \n " ) ) )
-      inv[ii, "parent_tag"]    = parent_tag
-      inv[ii, "date_modified"] = format( Sys.time(), "%Y_%b_%d|%H_%M_%S")
-      inv[ii, "filename"] = filename
-      inv[ii, "extra"]    = extra
+      warning( paste0( "Displacing an old row. It will now have the tag:     ", bump_tag ) )
     } else {
-      tag = rev( make.unique( c( inv$tag, tag ) ) )[1]
-      warning( paste0( "That tag is already taken. Using ", tag, " instead." ) )
-      row_add = data.frame( tag=tag,
-                            parent_tag=parent_tag,
-                            date_modified = format( Sys.time(), "%Y_%b_%d|%H_%M_%S"),
-                            filename=filename,
-                            extra=extra )
-      inv = rbind( inv, row_add )
+      warning( paste0( "That tag is already taken. Using ", bump_tag, " instead." ) )
     }
+    inv[which(inv$tag==tag), "tag"] = ifelse( force, bump_tag,      tag)
+    row_add = data.frame(     tag   = ifelse( force, tag,      bump_tag),
+                          parent_tag=parent_tag,
+                          date_modified = format( Sys.time(), "%Y_%b_%d|%H_%M_%S"),
+                          filename=filename,
+                          extra=extra )
   # if tag not present
   } else {
     row_add = data.frame( tag=tag,
@@ -79,8 +73,9 @@ inventory_add = function( tag = NULL, inv_location = NULL, filename = NULL,
                           date_modified = format( Sys.time(), "%Y_%b_%d|%H_%M_%S"),
                           filename=filename,
                           extra=extra )
-    inv = rbind( inv, row_add )
   }
+  inv = rbind( inv, row_add )
+
   utils::write.table( inv, inventory_path, quote = F, row.names = F, col.names = T, sep = "\t" )
 }
 

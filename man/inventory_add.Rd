@@ -5,7 +5,7 @@
 \title{Keep track of important items from previous analyses.}
 \usage{
 inventory_add(tag = NULL, inv_location = NULL, filename = NULL,
-  extra = "", parent_tag = "", force = FALSE)
+  extra = "", parent_tag = "", force = TRUE)
 }
 \arguments{
 \item{tag}{identifier for an inventory record that you want to add.}
@@ -22,7 +22,7 @@ the sky's the limit.}
 
 \item{parent_tag}{identifier for a file that this analysis depends on.}
 
-\item{force}{Overwrite or delete any existing entry with the given tag. Default is \code{FALSE}.}
+\item{force}{Bump any existing entry with the given tag, moving it to a backup with a similar name. Default is \code{TRUE}.}
 }
 \description{
 Keep track of important items from previous analyses.

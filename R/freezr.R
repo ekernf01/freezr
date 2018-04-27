@@ -131,7 +131,7 @@ freeze = function( analyses_to_run,
         my_err = run_it()
       }
       print(frozen_analysis_i)
-     # TODO: Send traceback to logfile
+     # Send traceback to logfile
       if( !is.null( my_err ) ){
         error_free = F
         logfile = file.path( destination, "logs", paste0( analysis_i, ".log" ) )
@@ -142,11 +142,9 @@ freeze = function( analyses_to_run,
                          " for error and traceback.\n " ) )
 
         if( !dir.exists( dirname( logfile ) ) ){
-          dir.create( dirname( logfile ) )
+          dir.create( dirname( logfile ), recursive = T )
         }
-        cat(my_err,                      sep = "\n", file = logfile, append = T)
-        cat("\n\n", file = logfile, append = T)
-        cat(capture.output(traceback()), sep = "\n", file = logfile, append = T)
+        cat(my_err, sep = "\n", file = logfile)
       }
     }
     sink_reset()
