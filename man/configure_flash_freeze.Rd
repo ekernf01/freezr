@@ -4,8 +4,8 @@
 \alias{configure_flash_freeze}
 \title{Return a function "flash_freeze" that saves on project-specific boilerplate compared to "freeze".}
 \usage{
-configure_flash_freeze(project_directory = getwd(), setup_scripts = NULL,
-  repos_to_track = project_directory)
+configure_flash_freeze(project_directory = getwd(),
+  setup_scripts = NULL, repos_to_track = project_directory)
 }
 \arguments{
 \item{project_directory}{Where's your freezr project? Should contain subdirectories "results" and "scripts." Try "freezr::create_empty_project".}

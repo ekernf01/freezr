@@ -116,7 +116,7 @@ freeze = function( analyses_to_run,
                                            replacement = "", 
                                            analysis_i ) )
       if( !dir.exists( dirname( frozen_analysis_i ) ) ){ 
-        dir.create( dirname( frozen_analysis_i ) )
+        dir.create( dirname( frozen_analysis_i ), recursive = T )
       }
       file.copy( from = analysis_i, to = frozen_analysis_i )
       
