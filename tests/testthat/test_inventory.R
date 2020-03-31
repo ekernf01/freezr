@@ -41,7 +41,7 @@ test_that( "find works", {
   inventory_make( results_path )
   testthat::expect_true(inventory_exists(        f1_abs))
   testthat::expect_true(inventory_exists(dirname(f1_abs)))
-  inventory_find( )
+  inventory_find( results_path )
   clean_up_inv()
   testthat::expect_false(inventory_exists(        f1_abs))
   testthat::expect_false(inventory_exists(dirname(f1_abs)))
@@ -51,31 +51,41 @@ test_that( "find works", {
 test_that( "add works after make", {
   clean_up_inv()
   inventory_make( results_path )
-  inventory_find( )
-  inventory_add( tag="my_dummy_dupe_tag", filename=f1 )
-  expect_warning( inventory_add( tag="my_dummy_dupe_tag", filename=f1 ) )
+  inventory_find( results_path )
+  inventory_add( tag="my_dummy_dupe_tag", filename=f1, inv_location = results_path )
+  expect_warning( inventory_add( tag="my_dummy_dupe_tag", filename=f1, inv_location = results_path ) )
   clean_up_inv()
 })
 
 
+test_that( "save_and_add works after make", {
+  clean_up_inv()
+  inventory_make( results_path )
+  demo_df = data.frame(LETTERS)
+  demo_mat = matrix(LETTERS)
+  inventory_save_and_add( demo_df,  extra = "Dataframe containing the alphabet.", inv_location = results_path )
+  inventory_save_and_add( demo_mat, extra = "Matrix containing the alphabet.", inv_location = results_path )
+  clean_up_inv()
+})
+
 test_that( "get works with incorrect arg", {
   clean_up_inv()
   inventory_make( results_path )
-  expect_warning(inventory_get( tag="this_tag_doesnt_exist" ))
+  expect_warning(inventory_get( tag="this_tag_doesnt_exist", inv_location = results_path ))
   clean_up_inv()
 })
 
 test_that( "get works with correct args", {
   clean_up_inv()
   inventory_make( results_path )
-  inventory_add( tag="my_dummy_output_2",
+  inventory_add( tag="my_dummy_output_2", inv_location = results_path,
                  filename = f1,
                  parent_tag = "my_dummy_output_2",
                  extra = paste( "This file is just some dummy output",
                                 "but if it were from one of my scientific projects",
                                 "I would ideally write about its origin, the processing it ",
                                 "has undergone, and its purpose."  ))
-  testthat::expect_equal(f1_abs, inventory_get( tag = "my_dummy_output_2" ))
+  testthat::expect_equal(f1_abs, inventory_get( tag = "my_dummy_output_2", inv_location = results_path ))
   clean_up_inv()
 })
 
@@ -91,14 +101,15 @@ test_that( "_transfer works for folders and for files with and without extension
   transferred_inv_path = file.path( dirname( results_path ), "transferred_inv" )
   clean_up_inv()
   inventory_make( results_path )
-  inventory_add( tag="f1_rel", filename = f1_rel )
-  inventory_add( tag="file_no_ext", filename = file_no_ext_rel )
-  inventory_add( tag="folder", filename = folder_rel )
+  inventory_add( tag="f1_rel",      filename = f1_rel,          inv_location = results_path )
+  inventory_add( tag="file_no_ext", filename = file_no_ext_rel, inv_location = results_path )
+  inventory_add( tag="folder",      filename = folder_rel,      inv_location = results_path )
   unlink(transferred_inv_path, recursive = T)
-  inventory_transfer( target_location = transferred_inv_path, overwrite = F )
-  expect_warning( inventory_transfer( target_location = transferred_inv_path, overwrite = T ),
+  inventory_transfer( target_location = transferred_inv_path, overwrite = F, inv_location = results_path )
+  expect_warning( inventory_transfer( target_location = transferred_inv_path, overwrite = T, inv_location = results_path ),
                   regexp = "*already exists*")
   clean_up_inv()
 })
 clean_up_inv()
 
+unlink(results_path, recursive = T)

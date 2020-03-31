@@ -1,2 +1,0 @@
-
- Freezing and running  scripts/script_that_fails.R 

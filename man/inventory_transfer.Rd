@@ -4,8 +4,12 @@
 \alias{inventory_transfer}
 \title{Copy all files listed in the inventory to the specified target location.}
 \usage{
-inventory_transfer(inv_location = NULL, target_location, overwrite = F,
-  verbose = F)
+inventory_transfer(
+  inv_location = NULL,
+  target_location,
+  overwrite = F,
+  verbose = F
+)
 }
 \arguments{
 \item{inv_location}{Where to look for the inventory.}

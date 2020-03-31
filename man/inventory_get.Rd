@@ -4,8 +4,7 @@
 \alias{inventory_get}
 \title{Retrieve (paths to) important items from previous analyses.}
 \usage{
-inventory_get(tag = NULL, inv_location = NULL,
-  return_all_fields = FALSE)
+inventory_get(tag = NULL, inv_location = NULL, return_all_fields = FALSE)
 }
 \arguments{
 \item{tag}{identifier for an inventory record that you want to access.}

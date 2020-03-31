@@ -1,2 +1,0 @@
-
- Freezing and running  testthat/functions_to_freeze.Rmd 

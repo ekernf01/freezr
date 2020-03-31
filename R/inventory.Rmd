@@ -1,6 +1,33 @@
 #### Keeping track of saved data files: `inventory_*`
 
 ```{r}
+#' Wrapper for inventory_add that also saves tables and R objects.
+#'
+inventory_save_and_add = function(
+  object,
+  tag = deparse(substitute(object)), 
+  file_type   = if( is.data.frame(object)){ "csv"     } else { "Rdata" },
+  save_method = if( is.data.frame(object)){ write.csv } else { saveRDS },
+  filename = file.path(results_path, paste0(tag, ".", file_type)),
+  extra, 
+  inv_location = NULL,
+  verbose = T, 
+  ...
+){
+  if(verbose){
+    cat(
+      "Writing to file", filename, 
+      "using method", deparse(substitute(save_method)),
+      ". \nRetrieve later using using inventory_get with tag=", tag, 
+      ". \nNotes say", extra
+    )
+  }
+  save_method( object, filename, ... )
+  inventory_add( tag = "expression_patterns_ko_vs_temporal", 
+                 filename = filename,
+                 extra = extra, 
+                 inv_location = inv_location )
+}
 
 #' Keep track of important items from previous analyses.
 #'

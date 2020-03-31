@@ -4,8 +4,14 @@
 \alias{inventory_add}
 \title{Keep track of important items from previous analyses.}
 \usage{
-inventory_add(tag = NULL, inv_location = NULL, filename = NULL,
-  extra = "", parent_tag = "", force = TRUE)
+inventory_add(
+  tag = NULL,
+  inv_location = NULL,
+  filename = NULL,
+  extra = "",
+  parent_tag = "",
+  force = TRUE
+)
 }
 \arguments{
 \item{tag}{identifier for an inventory record that you want to add.}

@@ -1,2 +1,0 @@
-
- Freezing and running  scripts/functions_to_freeze.Rmd 
