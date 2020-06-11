@@ -9,12 +9,26 @@ inventory_save_and_add(
   tag = deparse(substitute(object)),
   file_type = if (is.data.frame(object)) {     "csv" } else {     "Rdata" },
   save_method = if (is.data.frame(object)) {     write.csv } else {     saveRDS },
-  filename = file.path(results_path, paste0(tag, ".", file_type)),
+  filename = file.path(Sys.getenv("FREEZR_DESTINATION"), paste0(tag, ".", file_type)),
   extra,
   inv_location = NULL,
   verbose = T,
   ...
 )
+}
+\arguments{
+\item{object}{object gets saved by function save_method with extension file_type.}
+
+\item{tag}{identifier for an inventory record that you want to add.}
+
+\item{filename}{Path for the file that you want to save. Absolute or relative to inv_location.}
+
+\item{extra}{Any character string without tabs. Meant for notes to describe the saved data.}
+
+\item{inv_location}{Path to the inventory you want to create or modify. If possible, this arg
+defaults to the parent of the last destination given to `freeze`.}
+
+\item{force}{Bump any existing entry with the given tag, moving it to a backup with a similar name. Default is \code{TRUE}.}
 }
 \description{
 Wrapper for inventory_add that also saves tables and R objects.

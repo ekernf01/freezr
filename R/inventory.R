@@ -1,12 +1,22 @@
-## ----------------------------------------------------------------------------------------------------------------------------------
+## ----------------------------------------------------------------------------------------------
 #' Wrapper for inventory_add that also saves tables and R objects.
+#'
+#' @param object object gets saved by function save_method with extension file_type.    
+#' @param inv_location Path to the inventory you want to create or modify. If possible, this arg
+#'  defaults to the parent of the last destination given to `freeze`.
+#' @param tag identifier for an inventory record that you want to add.
+#' @param filename Path for the file that you want to save. Absolute or relative to inv_location.
+#' @param extra Any character string without tabs. Meant for notes to describe the saved data.
+#' @param force Bump any existing entry with the given tag, moving it to a backup with a similar name. Default is \code{TRUE}.
+#'
+#' @export
 #'
 inventory_save_and_add = function(
   object,
   tag = deparse(substitute(object)), 
   file_type   = if( is.data.frame(object)){ "csv"     } else { "Rdata" },
   save_method = if( is.data.frame(object)){ write.csv } else { saveRDS },
-  filename = file.path(results_path, paste0(tag, ".", file_type)),
+  filename = file.path(Sys.getenv("FREEZR_DESTINATION"), paste0(tag, ".", file_type)),
   extra, 
   inv_location = NULL,
   verbose = T, 
@@ -21,7 +31,7 @@ inventory_save_and_add = function(
     )
   }
   save_method( object, filename, ... )
-  inventory_add( tag = "expression_patterns_ko_vs_temporal", 
+  inventory_add( tag = tag, 
                  filename = filename,
                  extra = extra, 
                  inv_location = inv_location )
