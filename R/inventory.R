@@ -1,4 +1,4 @@
-## ----------------------------------------------------------------------------------------------
+## -------------------------------------------------------------------------------------------------------------------------------------------------------
 #' Wrapper for inventory_add that also saves tables and R objects.
 #'
 #' @param object object gets saved by function save_method with extension file_type.    
@@ -23,11 +23,11 @@ inventory_save_and_add = function(
   ...
 ){
   if(verbose){
-    cat(
-      "Writing to file", filename, 
-      "using method", deparse(substitute(save_method)),
-      ". \nRetrieve later using using inventory_get with tag=", tag, 
-      ". \nNotes say", extra
+    cat(sep = "",
+      "\n File: ", filename, 
+      "\n Save method: ", deparse(substitute(save_method)),
+      "\n To retrieve: inventory_get(tag ='", tag, "')", 
+      "\n Notes:", extra
     )
   }
   save_method( object, filename, ... )
