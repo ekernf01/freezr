@@ -40,8 +40,7 @@ Then you can start freezing code immediately. The following line will run `my_fu
 
 #### Other reproducibility tools
 
-*I recently found out about [`recordr`](https://github.com/NCEAS/recordr), which is very similar to `freezr`. I haven't tried `recordr` yet, but I know it is quite sophisticated and has some great interactive features. As far as I can see, the only functionality unique to `freezr` is the "inventory" system, which helps pass data between scripts. The inventory is very handy for the single cell RNA-seq projects that I work on.*  
-
+*I recently found out about [`recordr`](https://github.com/NCEAS/recordr), which is very similar to `freezr`. I haven't tried `recordr` yet, but I know it is quite sophisticated and has some great interactive features. As far as I can see, the only functionality unique to `freezr` is the "inventory" system, which helps pass data between scripts.*
 Here are some other tools relating to reproducible research in R. These solve problems that overlap with the domain of `freezr`, but none has the same purpose or functionality.
 
 - To deal with statistical issues such as the ["Garden of forking paths"](http://www.stat.columbia.edu/~gelman/research/unpublished/p_hacking.pdf), there's [`revisit`](https://github.com/matloff/revisit). 
@@ -51,7 +50,7 @@ Here are some other tools relating to reproducible research in R. These solve pr
 
 One inevitable question people ask is why we can't just use Git. Here's why I view Git as complementary to `freezr`, rather than capable of replacing `freezr`.
 
-- `freezr` lets you run the analysis and archive it, both with a single command. This is easier than constantly forcing yourself to alternate between interacting with data and taking notes. 
+- `freezr` lets you run the analysis and archive it, both with a single command. This is easier than constantly forcing yourself to alternate between interacting with data and taking notes/making commits. 
 - `freezr` makes it easy to run and archive multiple analyses simultaneously. You can view old and new material together, with no need to switch branches or go back to previous commits. 
 - `freezr` is tailored to R, saving information on language and package versions that does not usually live inside a repo (unless you use PackRat or similar).
 - `freezr` is easy to learn. 
